@@ -1,9 +1,17 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getWebViewerSummary } from "../../lib/auth";
 import { LoginCard } from "./_components/login-card";
 
 export default async function LoginPage() {
   const viewer = await getWebViewerSummary();
+  const requestHeaders = await headers();
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
+  const host =
+    requestHeaders.get("x-forwarded-host") ??
+    requestHeaders.get("host") ??
+    "localhost:3000";
+  const origin = `${protocol}://${host}`;
 
   if (viewer?.householdStatus === "active") {
     redirect("/");
@@ -33,7 +41,7 @@ export default async function LoginPage() {
         <LoginCard
           title="成员登录"
           helper="输入邮箱后，我们会发送登录链接到你的邮箱。"
-          redirectTo={`${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/auth/callback`}
+          redirectTo={`${origin}/auth/callback`}
         />
       </section>
     </main>

@@ -1,9 +1,17 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAdminViewerSummary } from "../../lib/auth";
 import { AdminLoginCard } from "./_components/admin-login-card";
 
 export default async function AdminLoginPage() {
   const viewer = await getAdminViewerSummary();
+  const requestHeaders = await headers();
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
+  const host =
+    requestHeaders.get("x-forwarded-host") ??
+    requestHeaders.get("host") ??
+    "localhost:3001";
+  const origin = `${protocol}://${host}`;
 
   if (viewer?.role === "owner" && viewer.householdStatus === "active") {
     redirect("/");
@@ -31,7 +39,7 @@ export default async function AdminLoginPage() {
           </p>
         </div>
         <AdminLoginCard
-          redirectTo={`${process.env.NEXT_PUBLIC_ADMIN_SITE_URL ?? "http://localhost:3001"}/auth/callback`}
+          redirectTo={`${origin}/auth/callback`}
         />
       </section>
     </main>

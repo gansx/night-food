@@ -16,12 +16,15 @@ This project uses OpenNext for Cloudflare Workers. The OpenNext Cloudflare build
 Add these in GitHub:
 
 - `CLOUDFLARE_API_TOKEN`
-- `CLOUDFLARE_ACCOUNT_ID`
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
-- `NEXT_PUBLIC_SITE_URL`
-- `NEXT_PUBLIC_ADMIN_SITE_URL`
+
+The workflow already contains:
+
+- the Cloudflare account id
+- the Supabase project URL
+- the Supabase publishable key
+
+The login callback URL is derived from the incoming request host at runtime, so separate site URL secrets are not required anymore.
 
 ## Expected Cloudflare worker names
 
