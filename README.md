@@ -67,6 +67,7 @@ For the recommended Git-based Cloudflare flow, use:
 - [docs/cloudflare-deployment.md](/C:/Users/gsx/Documents/New%20project%202/docs/cloudflare-deployment.md)
 - [docs/cloudflare-workers-builds.md](/C:/Users/gsx/Documents/New%20project%202/docs/cloudflare-workers-builds.md)
 - [docs/github-publish.md](/C:/Users/gsx/Documents/New%20project%202/docs/github-publish.md)
+- [docs/github-actions-cloudflare.md](/C:/Users/gsx/Documents/New%20project%202/docs/github-actions-cloudflare.md)
 
 ## Source Reference
 
