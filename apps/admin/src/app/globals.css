@@ -1,0 +1,41 @@
+:root {
+  --bg: #f4efe6;
+  --panel: #fffaf1;
+  --panel-alt: #f8f2e8;
+  --border: rgba(86, 64, 33, 0.12);
+  --text: #2b1f12;
+  --muted: #74614c;
+  --brand: #2f7d59;
+  --warn: #d66a2f;
+  --shadow: 0 18px 50px rgba(58, 43, 22, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: "Segoe UI", "PingFang SC", sans-serif;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top right, rgba(255, 210, 149, 0.24), transparent 26%),
+    linear-gradient(180deg, #fcf8f1 0%, var(--bg) 100%);
+}
+
+.admin-shell {
+  width: min(1320px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+}
+
+.admin-panel {
+  border-radius: 24px;
+  background: rgba(255, 250, 241, 0.92);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+

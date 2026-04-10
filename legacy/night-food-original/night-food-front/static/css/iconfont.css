@@ -1,0 +1,67 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4588862 */
+  src: url('//at.alicdn.com/t/c/font_4588862_om7g0aczwn.woff2?t=1718872621043') format('woff2'),
+       url('//at.alicdn.com/t/c/font_4588862_om7g0aczwn.woff?t=1718872621043') format('woff'),
+       url('//at.alicdn.com/t/c/font_4588862_om7g0aczwn.ttf?t=1718872621043') format('truetype'),
+       url('//at.alicdn.com/t/c/font_4588862_om7g0aczwn.svg?t=1718872621043#iconfont') format('svg');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.workshop-rili:before {
+  content: "\e601";
+}
+
+.workshop-hezi:before {
+  content: "\e6a1";
+}
+
+.workshop-tuding:before {
+  content: "\e635";
+}
+
+.workshop-tubiaozhizuomoban:before {
+  content: "\e622";
+}
+
+.workshop-xinxi:before {
+  content: "\e6aa";
+}
+
+.workshop-qiandai:before {
+  content: "\e600";
+}
+
+.workshop-shijian:before {
+  content: "\e77c";
+}
+
+.workshop-shanchu:before {
+  content: "\e74b";
+}
+
+.workshop-gouwuche:before {
+  content: "\e621";
+}
+
+.workshop-shoucang:before {
+  content: "\eca7";
+}
+
+.workshop-dingdanguanli:before {
+  content: "\e629";
+}
+
+.workshop-faburenwu:before {
+  content: "\e658";
+}
+
+.workshop-jifenduihuan:before {
+  content: "\e645";
+}

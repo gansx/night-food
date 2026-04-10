@@ -1,0 +1,130 @@
+import { formatDateTime, getOrderStatusLabel } from "@night-food/lib";
+import type { OrderStatus } from "@night-food/types";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getAdminViewerSummary } from "../../../lib/auth";
+import { createSupabaseServerClient } from "../../../lib/supabase/server-client";
+import { AdminShell } from "../../_components/admin-shell";
+
+export default async function AdminOrderDetailPage({
+  params
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const viewer = await getAdminViewerSummary();
+  if (!viewer) {
+    redirect("/login");
+  }
+
+  if (!viewer.householdId || viewer.role !== "owner") {
+    redirect("/");
+  }
+
+  const { id } = await params;
+  const supabase = await createSupabaseServerClient();
+  const [{ data: order }, { data: items }, { data: logs }] = await Promise.all([
+    supabase
+      .from("orders")
+      .select("id, order_number, status, total_points, subtotal_points, remark, created_at")
+      .eq("id", id)
+      .eq("household_id", viewer.householdId)
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("order_items")
+      .select("id, quantity, subtotal_points, unit_points, menu_items(name)")
+      .eq("order_id", id),
+    supabase
+      .from("order_status_logs")
+      .select("id, from_status, to_status, note, created_at")
+      .eq("order_id", id)
+      .order("created_at", { ascending: false })
+  ]);
+
+  if (!order) {
+    return (
+      <AdminShell title="订单详情" description="没有找到这个订单。">
+        <section className="admin-panel" style={{ padding: 24 }}>
+          <Link href="/orders" style={{ color: "var(--brand)", fontWeight: 700 }}>
+            返回订单列表
+          </Link>
+        </section>
+      </AdminShell>
+    );
+  }
+
+  return (
+    <AdminShell title="订单详情" description="查看订单明细、状态流转和家主备注。">
+      <section style={{ display: "grid", gridTemplateColumns: "1fr 0.95fr", gap: 20 }}>
+        <div className="admin-panel" style={{ padding: 24 }}>
+          <Link href="/orders" style={{ color: "var(--brand)", fontWeight: 700 }}>
+            返回订单列表
+          </Link>
+          <h2 style={{ margin: "16px 0 0", fontSize: 24 }}>{order.order_number}</h2>
+          <div style={{ marginTop: 10, color: "var(--muted)", lineHeight: 1.7 }}>
+            状态：{getOrderStatusLabel(order.status as OrderStatus)}
+            <br />
+            小计：{Number(order.subtotal_points)} 积分
+            <br />
+            合计：{Number(order.total_points)} 积分
+            <br />
+            下单时间：{formatDateTime(order.created_at as string)}
+            <br />
+            备注：{(order.remark as string | null) || "无"}
+          </div>
+
+          <div style={{ marginTop: 20, display: "grid", gap: 12 }}>
+            {(items ?? []).map((item) => {
+              const menuItem = Array.isArray(item.menu_items) ? item.menu_items[0] : item.menu_items;
+              return (
+                <div
+                  key={item.id as string}
+                  style={{
+                    padding: 14,
+                    borderRadius: 16,
+                    background: "var(--panel-alt)"
+                  }}
+                >
+                  {(menuItem?.name as string | undefined) ?? "已删除菜品"} x {Number(item.quantity)} | 单价{" "}
+                  {Number(item.unit_points)} | 小计 {Number(item.subtotal_points)}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="admin-panel" style={{ padding: 24 }}>
+          <h2 style={{ margin: 0, fontSize: 20 }}>状态日志</h2>
+          <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
+            {(logs ?? []).length ? (
+              (logs ?? []).map((log) => (
+                <div
+                  key={log.id as string}
+                  style={{
+                    padding: 14,
+                    borderRadius: 16,
+                    background: "rgba(255,255,255,0.72)",
+                    border: "1px solid var(--border)"
+                  }}
+                >
+                  <strong>
+                    {(log.from_status as string | null) || "初始"}
+                    {" -> "}
+                    {String(log.to_status)}
+                  </strong>
+                  <div style={{ marginTop: 8, color: "var(--muted)", lineHeight: 1.7 }}>
+                    {(log.note as string | null) || "无备注"}
+                    <br />
+                    {formatDateTime(log.created_at as string)}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ color: "var(--muted)" }}>当前还没有状态日志。</div>
+            )}
+          </div>
+        </div>
+      </section>
+    </AdminShell>
+  );
+}
