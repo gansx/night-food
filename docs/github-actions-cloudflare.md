@@ -24,7 +24,9 @@ The workflow already contains:
 - the Supabase project URL
 - the Supabase publishable key
 
-The login callback URL is derived from the incoming request host at runtime, so separate site URL secrets are not required anymore.
+The login callback URL is derived from the incoming request host at runtime, and the stable `workers.dev` URLs are also committed into Wrangler vars for owner/member cross-links.
+
+During deployment, the workflow also runs `wrangler secret put SUPABASE_SERVICE_ROLE_KEY` so the Worker runtime gets the secret before the final deploy step.
 
 ## Expected Cloudflare worker names
 

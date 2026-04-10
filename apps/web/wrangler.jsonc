@@ -4,11 +4,16 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-04-09",
   "compatibility_flags": ["nodejs_compat"],
+  "secrets": {
+    "required": ["SUPABASE_SERVICE_ROLE_KEY"]
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
   "vars": {
-    "NEXT_PUBLIC_SITE_URL": "https://night-food-web.example.workers.dev"
+    "NEXT_PUBLIC_SUPABASE_URL": "https://vlztpqhqjnucfwepxwbw.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_ZTdcGQMO3i_RuNA2jO3VkQ_qVjnyEaX",
+    "NEXT_PUBLIC_SITE_URL": "https://night-food-web.798622053.workers.dev"
   }
 }

@@ -47,6 +47,10 @@ jobs:
         working-directory: apps/admin
         run: pnpm cf:build
 
+      - name: Sync admin runtime secret
+        working-directory: apps/admin
+        run: printf '%s' "$SUPABASE_SERVICE_ROLE_KEY" | pnpm exec wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+
       - name: Deploy admin worker
         working-directory: apps/admin
         run: pnpm cf:deploy -- --keep-vars
