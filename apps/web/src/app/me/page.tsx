@@ -23,8 +23,8 @@ export default async function MePage({
   const to = from + pageSize - 1;
 
   const supabase = await createSupabaseServerClient();
-  const [{ data: profile }, { data: account }, { data: transactions, count }] = await Promise.all([
-    supabase.from("profiles").select("display_name, phone").eq("user_id", viewer.userId).limit(1).maybeSingle(),
+  const [profileResult, { data: account }, { data: transactions, count }, householdResult] = await Promise.all([
+    supabase.from("profiles").select("username, display_name, phone").eq("user_id", viewer.userId).limit(1).maybeSingle(),
     viewer.householdId
       ? supabase
           .from("points_accounts")
@@ -43,34 +43,90 @@ export default async function MePage({
           .order("created_at", { ascending: false })
           .range(from, to)
       : Promise.resolve({ data: [], count: 0 }),
+    viewer.householdId
+      ? supabase
+          .from("households")
+          .select("name, family_code")
+          .eq("id", viewer.householdId)
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null })
   ]);
+  let profile: Record<string, any> | null = profileResult.data;
+  if (profileResult.error?.message.toLowerCase().includes("username")) {
+    const { data: fallbackProfile } = await supabase
+      .from("profiles")
+      .select("display_name, phone")
+      .eq("user_id", viewer.userId)
+      .limit(1)
+      .maybeSingle();
+    profile = fallbackProfile;
+  }
+
+  let household: Record<string, any> | null = householdResult.data;
+  const householdErrorMessage = "error" in householdResult ? householdResult.error?.message : undefined;
+  if (householdErrorMessage?.toLowerCase().includes("family_code") && viewer.householdId) {
+    const { data: fallbackHousehold } = await supabase
+      .from("households")
+      .select("name, slug")
+      .eq("id", viewer.householdId)
+      .limit(1)
+      .maybeSingle();
+    household = fallbackHousehold ? { ...fallbackHousehold, family_code: fallbackHousehold.slug } : null;
+  }
 
   const totalPages = Math.max(Math.ceil((count ?? 0) / pageSize), 1);
+  const familyStatusLabel =
+    viewer.householdStatus === "active"
+      ? "已加入家庭"
+      : viewer.householdStatus === "inactive"
+        ? "已被停用"
+        : viewer.householdStatus === "removed"
+          ? "已移出家庭"
+          : "未加入家庭";
 
   return (
     <MemberShell
       title="我的"
       description="查看个人资料、家庭身份、积分余额和完整积分流水。"
     >
+      {!viewer.householdId ? (
+        <section
+          className="glass-panel"
+          style={{
+            padding: 20,
+            marginBottom: 20,
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 16,
+            alignItems: "center",
+            flexWrap: "wrap"
+          }}
+        >
+          <div>
+            <strong>当前账号还没有加入家庭。</strong>
+            <div style={{ marginTop: 6, color: "var(--text-muted)" }}>输入家庭邀请码后才能点餐、领取任务和使用积分。</div>
+          </div>
+          <Link href="/family" style={primaryLinkStyle}>
+            输入邀请码
+          </Link>
+        </section>
+      ) : null}
+
       <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         <div style={{ display: "grid", gap: 20 }}>
           <div className="glass-panel" style={{ padding: 24 }}>
             <h2 className="section-title">个人信息</h2>
             <div style={{ marginTop: 16, display: "grid", gap: 10, color: "var(--text-muted)" }}>
+              <div>账号：{(profile?.username as string | undefined) ?? viewer.username ?? "未设置"}</div>
               <div>昵称：{(profile?.display_name as string | undefined) ?? "未设置"}</div>
               <div>手机号：{(profile?.phone as string | undefined) ?? "未绑定"}</div>
               <div>当前身份：{viewer.roleLabel}</div>
-              <div>登录邮箱：{viewer.email || "未获取到邮箱"}</div>
-              <div>
-                家庭状态：
-                {viewer.householdStatus === "active"
-                  ? "已加入家庭"
-                  : viewer.householdStatus === "inactive"
-                    ? "已被停用"
-                    : viewer.householdStatus === "removed"
-                      ? "已移出家庭"
-                      : "未加入家庭"}
-              </div>
+              <div>家庭状态：{familyStatusLabel}</div>
+              <div>当前家庭：{(household?.name as string | undefined) ?? "未加入家庭"}</div>
+              {viewer.role === "owner" && household?.family_code ? (
+                <div>家庭邀请码：{household.family_code as string}</div>
+              ) : null}
             </div>
           </div>
 
@@ -133,6 +189,14 @@ export default async function MePage({
     </MemberShell>
   );
 }
+
+const primaryLinkStyle = {
+  borderRadius: 999,
+  padding: "12px 18px",
+  background: "var(--brand)",
+  color: "#fff",
+  fontWeight: 700
+} satisfies React.CSSProperties;
 
 const pagerStyle = {
   display: "inline-flex",

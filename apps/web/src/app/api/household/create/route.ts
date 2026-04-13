@@ -1,13 +1,12 @@
 import { buildDisplayNameFallback, createFamilyCode } from "@night-food/lib";
-import type { HouseholdBootstrapPayload } from "@night-food/types";
+import type { HouseholdCreatePayload } from "@night-food/types";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server-client";
 import { createSupabaseServiceRoleClient } from "../../../../lib/supabase/service-role-client";
 
-const bootstrapSchema = z.object({
-  householdName: z.string().trim().min(2, "家庭名称至少 2 个字符").max(40, "家庭名称不要超过 40 个字符"),
-  displayName: z.string().trim().max(24, "昵称不要超过 24 个字符").optional().or(z.literal(""))
+const createHouseholdSchema = z.object({
+  householdName: z.string().trim().min(2, "家庭名称至少 2 个字符").max(40, "家庭名称不要超过 40 个字符")
 });
 
 export async function POST(request: Request) {
@@ -20,8 +19,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "请先登录。" }, { status: 401 });
   }
 
-  const payload = (await request.json()) as HouseholdBootstrapPayload;
-  const parsed = bootstrapSchema.safeParse(payload);
+  const payload = (await request.json()) as HouseholdCreatePayload;
+  const parsed = createHouseholdSchema.safeParse(payload);
 
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "参数错误" }, { status: 400 });
@@ -37,7 +36,7 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (existingMembership) {
-    return NextResponse.json({ error: "你已经加入了一个家庭，无需重复创建。", redirectTo: "/members" }, { status: 409 });
+    return NextResponse.json({ error: "你已经加入了一个家庭，不能重复创建。", redirectTo: "/" }, { status: 409 });
   }
 
   const { data: profile } = await serviceSupabase
@@ -47,12 +46,10 @@ export async function POST(request: Request) {
     .limit(1)
     .maybeSingle();
 
-  const displayName = parsed.data.displayName?.trim() || (profile?.display_name as string | null) || buildDisplayNameFallback(user.id);
   const profileRecord = {
     user_id: user.id,
     username: (profile?.username as string | null) ?? `member_${user.id.replace(/-/g, "").slice(0, 8)}`,
-    display_name: displayName,
-    updated_at: new Date().toISOString()
+    display_name: (profile?.display_name as string | null) ?? buildDisplayNameFallback(user.id)
   };
   const { error: profileUpsertError } = await serviceSupabase.from("profiles").upsert(profileRecord, {
     onConflict: "user_id"
@@ -62,8 +59,7 @@ export async function POST(request: Request) {
     const { error: fallbackProfileError } = await serviceSupabase.from("profiles").upsert(
       {
         user_id: user.id,
-        display_name: displayName,
-        updated_at: profileRecord.updated_at
+        display_name: profileRecord.display_name
       },
       { onConflict: "user_id" }
     );
@@ -125,6 +121,7 @@ export async function POST(request: Request) {
   }
 
   const householdId = household.id;
+
   const { error: memberError } = await serviceSupabase.from("household_members").insert({
     household_id: householdId,
     user_id: user.id,
@@ -150,5 +147,5 @@ export async function POST(request: Request) {
     owner_user_id: user.id
   });
 
-  return NextResponse.json({ householdId, familyCode: household.family_code, redirectTo: "/members" });
+  return NextResponse.json({ householdId, familyCode: household.family_code, redirectTo: "/" });
 }

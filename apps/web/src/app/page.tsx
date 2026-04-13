@@ -115,7 +115,7 @@ export default async function HomePage() {
               {viewer ? viewer.roleLabel : "未登录"}
             </div>
             <div style={{ marginTop: 10, color: "var(--text-muted)" }}>
-              {viewer ? viewer.email : "登录后即可进入你的家庭空间。"}
+              {viewer ? viewer.displayName || viewer.username || "已登录" : "登录后即可进入你的家庭空间。"}
             </div>
             <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
               <StatRow label="当前积分" value={String(account?.balance ?? 0)} accent="var(--brand)" />
@@ -160,11 +160,11 @@ export default async function HomePage() {
           <div>
             <strong>你还没有加入任何家庭。</strong>
             <div style={{ marginTop: 6, color: "var(--text-muted)" }}>
-              让家主发送邀请链接给你，或先确认你已使用正确邮箱登录。
+              输入家主给你的家庭邀请码，或自己创建一个新的家庭。
             </div>
           </div>
           <Link
-            href="/login"
+            href="/family"
             style={{
               borderRadius: 999,
               padding: "12px 18px",
@@ -173,7 +173,7 @@ export default async function HomePage() {
               fontWeight: 700
             }}
           >
-            查看登录入口
+            进入家庭引导
           </Link>
         </section>
       ) : null}

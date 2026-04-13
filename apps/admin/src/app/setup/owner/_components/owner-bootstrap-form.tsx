@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import type { HouseholdBootstrapPayload } from "@night-food/types";
+import { useState } from "react";
 
 export function OwnerBootstrapForm() {
   const [form, setForm] = useState<HouseholdBootstrapPayload>({
     householdName: "",
     displayName: ""
   });
-  const [message, setMessage] = useState("创建完成后，你会成为该家庭的家主。");
+  const [message, setMessage] = useState("创建完成后，你会成为该家庭的家主，并获得家庭邀请码。");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -25,14 +25,14 @@ export function OwnerBootstrapForm() {
         body: JSON.stringify(form)
       });
 
-      const payload = (await response.json()) as { error?: string; redirectTo?: string };
+      const payload = (await response.json()) as { error?: string; redirectTo?: string; familyCode?: string };
 
       if (!response.ok) {
         setMessage(payload.error ?? "创建家庭失败");
         return;
       }
 
-      setMessage("家庭创建成功，正在跳转到成员管理...");
+      setMessage(`家庭创建成功，邀请码是 ${payload.familyCode ?? "已生成"}，正在跳转到成员管理...`);
       window.location.href = payload.redirectTo ?? "/members";
     } catch {
       setMessage("网络异常，请稍后重试。");
@@ -48,9 +48,7 @@ export function OwnerBootstrapForm() {
           <span style={{ color: "var(--muted)", fontSize: 14 }}>家庭名称</span>
           <input
             value={form.householdName}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, householdName: event.target.value }))
-            }
+            onChange={(event) => setForm((current) => ({ ...current, householdName: event.target.value }))}
             placeholder="例如：夜食坊之家"
             style={inputStyle}
           />
@@ -58,10 +56,8 @@ export function OwnerBootstrapForm() {
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>你的显示名称</span>
           <input
-            value={form.displayName}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, displayName: event.target.value }))
-            }
+            value={form.displayName ?? ""}
+            onChange={(event) => setForm((current) => ({ ...current, displayName: event.target.value }))}
             placeholder="例如：爸爸"
             style={inputStyle}
           />
@@ -70,19 +66,7 @@ export function OwnerBootstrapForm() {
 
       <p style={{ margin: "14px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>{message}</p>
 
-      <button
-        type="submit"
-        disabled={loading}
-        style={{
-          marginTop: 8,
-          border: 0,
-          borderRadius: 999,
-          padding: "12px 18px",
-          background: loading ? "#93b2a4" : "var(--brand)",
-          color: "#fff",
-          cursor: "pointer"
-        }}
-      >
+      <button type="submit" disabled={loading} style={buttonStyle}>
         {loading ? "创建中..." : "创建我的家庭"}
       </button>
     </form>
@@ -98,3 +82,12 @@ const inputStyle = {
   background: "rgba(255,255,255,0.86)"
 } satisfies React.CSSProperties;
 
+const buttonStyle = {
+  marginTop: 8,
+  border: 0,
+  borderRadius: 999,
+  padding: "12px 18px",
+  background: "var(--brand)",
+  color: "#fff",
+  cursor: "pointer"
+} satisfies React.CSSProperties;

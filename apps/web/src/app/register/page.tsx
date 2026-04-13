@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getWebViewerSummary } from "../../lib/auth";
-import { LoginCard } from "./_components/login-card";
+import { RegisterCard } from "./_components/register-card";
 
-export default async function LoginPage() {
+export default async function RegisterPage() {
   const viewer = await getWebViewerSummary();
 
   if (viewer?.householdStatus === "active") {
@@ -22,15 +22,15 @@ export default async function LoginPage() {
         }}
       >
         <div>
-          <div style={{ color: "var(--brand-dark)", fontWeight: 700, fontSize: 14 }}>家庭成员登录</div>
+          <div style={{ color: "var(--brand-dark)", fontWeight: 700, fontSize: 14 }}>家庭账号注册</div>
           <h1 style={{ margin: "12px 0 0", fontSize: "clamp(2rem, 4vw, 3rem)" }}>
-            登录到你的家庭空间
+            创建一个家里人都能理解的账号
           </h1>
           <p className="section-copy" style={{ maxWidth: 560 }}>
-            现在只需要账号和密码。登录后，如果你还没有加入家庭，可以输入家主给你的家庭邀请码。
+            不再使用邮箱登录。每个人用自己的账号密码进入，之后通过家庭邀请码加入同一个家庭。
           </p>
         </div>
-        <LoginCard />
+        <RegisterCard />
       </section>
     </main>
   );

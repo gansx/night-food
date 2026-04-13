@@ -1,17 +1,21 @@
 "use client";
 
+import { createAuthEmailFromUsername, isValidUsername, normalizeUsername } from "@night-food/lib";
+import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
 import { hasPublicSupabaseEnv } from "../../../lib/env";
 import { createSupabaseBrowserClient } from "../../../lib/supabase/browser-client";
 
 const loginSchema = z.object({
-  email: z.string().email("请输入有效邮箱地址")
+  username: z.string().trim().refine(isValidUsername, "账号只能包含小写字母、数字和下划线，长度 3-24 位"),
+  password: z.string().min(1, "请输入密码")
 });
 
-export function AdminLoginCard({ redirectTo }: { redirectTo: string }) {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("输入家主邮箱后发送登录链接。");
+export function AdminLoginCard() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("家主使用账号和密码登录，不再发送邮箱登录链接。");
   const [loading, setLoading] = useState(false);
 
   const envReady = hasPublicSupabaseEnv();
@@ -19,34 +23,33 @@ export function AdminLoginCard({ redirectTo }: { redirectTo: string }) {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const parsed = loginSchema.safeParse({ email });
+    const parsed = loginSchema.safeParse({ username, password });
     if (!parsed.success) {
-      setMessage(parsed.error.issues[0]?.message ?? "邮箱格式不正确");
+      setMessage(parsed.error.issues[0]?.message ?? "请检查账号和密码");
       return;
     }
 
     if (!envReady) {
-      setMessage("尚未配置 Supabase 环境变量，当前表单处于演示模式。");
+      setMessage("尚未配置 Supabase 环境变量，当前表单无法登录。");
       return;
     }
 
     try {
       setLoading(true);
-      setMessage("正在发送管理台登录链接...");
+      setMessage("正在登录管理台...");
       const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.signInWithOtp({
-        email: parsed.data.email,
-        options: {
-          emailRedirectTo: redirectTo
-        }
+      const { error } = await supabase.auth.signInWithPassword({
+        email: createAuthEmailFromUsername(parsed.data.username),
+        password: parsed.data.password
       });
 
       if (error) {
-        setMessage(error.message);
+        setMessage("账号或密码不正确。");
         return;
       }
 
-      setMessage("管理台登录链接已发送，请检查邮箱。");
+      setMessage("登录成功，正在进入管理台...");
+      window.location.href = "/";
     } finally {
       setLoading(false);
     }
@@ -54,38 +57,58 @@ export function AdminLoginCard({ redirectTo }: { redirectTo: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="admin-panel" style={{ padding: 20 }}>
-      <label style={{ display: "grid", gap: 8 }}>
-        <span style={{ color: "var(--muted)", fontSize: 14 }}>家主邮箱</span>
-        <input
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="owner@example.com"
-          style={{
-            borderRadius: 16,
-            border: "1px solid var(--border)",
-            padding: "14px 16px",
-            fontSize: 16,
-            outline: "none",
-            background: "rgba(255,255,255,0.86)"
-          }}
-        />
-      </label>
+      <div style={{ display: "grid", gap: 14 }}>
+        <label style={{ display: "grid", gap: 8 }}>
+          <span style={{ color: "var(--muted)", fontSize: 14 }}>账号</span>
+          <input
+            value={username}
+            onChange={(event) => setUsername(normalizeUsername(event.target.value))}
+            placeholder="例如 owner_01"
+            autoComplete="username"
+            style={inputStyle}
+          />
+        </label>
+        <label style={{ display: "grid", gap: 8 }}>
+          <span style={{ color: "var(--muted)", fontSize: 14 }}>密码</span>
+          <input
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="请输入密码"
+            type="password"
+            autoComplete="current-password"
+            style={inputStyle}
+          />
+        </label>
+      </div>
       <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>{message}</p>
-      <button
-        type="submit"
-        disabled={loading}
-        style={{
-          marginTop: 8,
-          border: 0,
-          borderRadius: 999,
-          padding: "12px 18px",
-          background: loading ? "#8bb8a4" : "var(--brand)",
-          color: "#fff",
-          cursor: "pointer"
-        }}
-      >
-        {loading ? "发送中..." : "发送登录链接"}
+      <button type="submit" disabled={loading} style={buttonStyle}>
+        {loading ? "登录中..." : "登录管理台"}
       </button>
+      <div style={{ marginTop: 14, color: "var(--muted)", fontSize: 14 }}>
+        还没有家主账号？{" "}
+        <Link href="/register" style={{ color: "var(--brand)", fontWeight: 700 }}>
+          先注册
+        </Link>
+      </div>
     </form>
   );
 }
+
+const inputStyle = {
+  borderRadius: 16,
+  border: "1px solid var(--border)",
+  padding: "14px 16px",
+  fontSize: 16,
+  outline: "none",
+  background: "rgba(255,255,255,0.86)"
+} satisfies React.CSSProperties;
+
+const buttonStyle = {
+  marginTop: 8,
+  border: 0,
+  borderRadius: 999,
+  padding: "12px 18px",
+  background: "var(--brand)",
+  color: "#fff",
+  cursor: "pointer"
+} satisfies React.CSSProperties;

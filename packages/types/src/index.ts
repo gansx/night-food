@@ -26,9 +26,26 @@ export type NavigationItem = {
   kicker?: string;
 };
 
+export type UsernamePasswordCredentials = {
+  username: string;
+  password: string;
+};
+
+export type RegisterAccountPayload = UsernamePasswordCredentials & {
+  displayName: string;
+};
+
 export type HouseholdBootstrapPayload = {
   householdName: string;
-  displayName: string;
+  displayName?: string;
+};
+
+export type HouseholdCreatePayload = {
+  householdName: string;
+};
+
+export type JoinHouseholdByCodePayload = {
+  familyCode: string;
 };
 
 export type HouseholdInvitationPayload = {
@@ -119,7 +136,7 @@ export const webPrimaryNav: NavigationItem[] = [
   {
     href: "/me",
     label: "我的",
-    description: "管理资料、积分和加入状态。"
+    description: "管理资料、积分和家庭加入状态。"
   }
 ];
 
@@ -170,7 +187,7 @@ export const adminPrimaryNav: NavigationItem[] = [
   {
     href: "/tasks",
     label: "任务管理",
-    description: "发布任务、查看日志、审批完成和关闭任务。",
+    description: "发布任务、查看日志、审核完成和关闭任务。",
     background: "linear-gradient(180deg, #effaf2 0%, #fbfffc 100%)"
   },
   {
@@ -182,7 +199,7 @@ export const adminPrimaryNav: NavigationItem[] = [
   {
     href: "/members",
     label: "成员管理",
-    description: "邀请家人、分配角色和停用访问权限。",
+    description: "查看邀请码、管理家人角色和访问状态。",
     background: "linear-gradient(180deg, #fff0f7 0%, #fff8fc 100%)"
   },
   {

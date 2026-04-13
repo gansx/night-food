@@ -21,3 +21,16 @@ export function getPublicSupabaseEnv() {
   };
 }
 
+export function hasServiceRoleEnv() {
+  return Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
+export function getServiceRoleKey() {
+  const value = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!value) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set.");
+  }
+
+  return value;
+}

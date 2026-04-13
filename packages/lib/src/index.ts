@@ -17,6 +17,9 @@ export type TaskStatus =
   | "completed"
   | "cancelled";
 
+const AUTH_EMAIL_DOMAIN = "users.night-food.local";
+const FAMILY_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
 export function getDashboardTargetByRole(role: AppRole): DashboardTarget {
   return role === "owner" ? "owner" : "member";
 }
@@ -61,8 +64,45 @@ export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-export function buildDisplayNameFallback(email: string): string {
-  return normalizeEmail(email).split("@")[0] || "family-member";
+export function normalizeUsername(username: string): string {
+  return username.trim().toLowerCase();
+}
+
+export function isValidUsername(username: string): boolean {
+  return /^[a-z0-9_]{3,24}$/.test(normalizeUsername(username));
+}
+
+export function createAuthEmailFromUsername(username: string): string {
+  return `${normalizeUsername(username)}@${AUTH_EMAIL_DOMAIN}`;
+}
+
+export function getUsernameFromAuthEmail(email?: string | null): string {
+  const normalized = normalizeEmail(email ?? "");
+  const suffix = `@${AUTH_EMAIL_DOMAIN}`;
+  return normalized.endsWith(suffix) ? normalized.slice(0, -suffix.length) : "";
+}
+
+export function buildDisplayNameFallback(identity: string): string {
+  const normalized = identity.includes("@") ? normalizeEmail(identity).split("@")[0] : normalizeUsername(identity);
+  return normalized || "family-member";
+}
+
+export function normalizeFamilyCode(code: string): string {
+  return code.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+export function createFamilyCode(length = 8): string {
+  const values = new Uint32Array(length);
+
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    crypto.getRandomValues(values);
+  } else {
+    for (let index = 0; index < length; index += 1) {
+      values[index] = Math.floor(Math.random() * 4294967295);
+    }
+  }
+
+  return Array.from(values, (value) => FAMILY_CODE_ALPHABET[value % FAMILY_CODE_ALPHABET.length]).join("");
 }
 
 export function createHouseholdSlug(name: string): string {
@@ -118,7 +158,7 @@ export function getTaskStatusLabel(status: TaskStatus): string {
     case "in_progress":
       return "进行中";
     case "submitted":
-      return "待审批";
+      return "待审核";
     case "completed":
       return "已完成";
     case "cancelled":

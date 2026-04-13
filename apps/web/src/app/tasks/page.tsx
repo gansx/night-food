@@ -25,7 +25,10 @@ export default async function TasksPage({
     return (
       <MemberShell title="家庭任务中心" description="你还没有加入家庭，暂时无法参与任务。">
         <section className="glass-panel" style={{ padding: 24, color: "var(--text-muted)" }}>
-          请让家主先邀请你加入家庭。
+          请先输入家庭邀请码加入家庭。{" "}
+          <Link href="/family" style={{ color: "var(--brand)", fontWeight: 700 }}>
+            前往家庭引导
+          </Link>
         </section>
       </MemberShell>
     );

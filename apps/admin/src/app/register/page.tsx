@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getAdminViewerSummary } from "../../lib/auth";
-import { AdminLoginCard } from "./_components/admin-login-card";
+import { AdminRegisterCard } from "./_components/admin-register-card";
 
-export default async function AdminLoginPage() {
+export default async function AdminRegisterPage() {
   const viewer = await getAdminViewerSummary();
 
   if (viewer?.role === "owner" && viewer.householdStatus === "active") {
@@ -22,15 +22,15 @@ export default async function AdminLoginPage() {
         }}
       >
         <div>
-          <div style={{ color: "var(--brand)", fontWeight: 700, fontSize: 14 }}>家主登录</div>
+          <div style={{ color: "var(--brand)", fontWeight: 700, fontSize: 14 }}>家主账号注册</div>
           <h1 style={{ margin: "12px 0 0", fontSize: "clamp(2rem, 4vw, 3rem)" }}>
-            登录家庭管理台
+            先创建家主账号
           </h1>
           <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.7 }}>
-            家主用账号密码进入管理台。首次使用时先注册账号，再创建家庭并获得家庭邀请码。
+            注册后创建家庭，系统会生成家庭邀请码。家人注册自己的账号后输入邀请码即可加入。
           </p>
         </div>
-        <AdminLoginCard />
+        <AdminRegisterCard />
       </section>
     </main>
   );

@@ -5,6 +5,7 @@ import { AdminShell } from "../_components/admin-shell";
 import { getAdminViewerSummary } from "../../lib/auth";
 import { createSupabaseServerClient } from "../../lib/supabase/server-client";
 import { HouseholdSettingsForm } from "./_components/household-settings-form";
+import { RefreshFamilyCodeButton } from "./_components/refresh-family-code-button";
 
 export default async function SettingsPage() {
   const viewer = await getAdminViewerSummary();
@@ -30,7 +31,7 @@ export default async function SettingsPage() {
   }
 
   const supabase = await createSupabaseServerClient();
-  const [{ data: settings }, { data: household }] = await Promise.all([
+  const [{ data: settings }, householdResult] = await Promise.all([
     supabase
       .from("household_settings")
       .select(
@@ -41,11 +42,28 @@ export default async function SettingsPage() {
       .maybeSingle(),
     supabase
       .from("households")
-      .select("name, timezone")
+      .select("name, timezone, family_code, family_code_updated_at")
       .eq("id", viewer.householdId)
       .limit(1)
       .maybeSingle()
   ]);
+  let household = householdResult.data;
+
+  if (householdResult.error?.message.toLowerCase().includes("family_code")) {
+    const { data: fallbackHousehold } = await supabase
+      .from("households")
+      .select("name, timezone, slug")
+      .eq("id", viewer.householdId)
+      .limit(1)
+      .maybeSingle();
+    household = fallbackHousehold
+      ? {
+          ...fallbackHousehold,
+          family_code: fallbackHousehold.slug,
+          family_code_updated_at: null
+        }
+      : null;
+  }
 
   const orderingWindowLabel = formatOrderingWindow(
     settings?.ordering_window_start as string | null | undefined,
@@ -55,7 +73,7 @@ export default async function SettingsPage() {
   return (
     <AdminShell
       title="规则设置"
-      description="配置点餐开关、时间窗、任务审核、积分规则和家庭公告。"
+      description="配置点餐开关、时间窗、任务审核、积分规则、家庭公告和家庭邀请码。"
     >
       <section style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>
@@ -95,6 +113,25 @@ export default async function SettingsPage() {
             }}
           >
             {settings?.announcement_text || "当前还没有设置家庭公告。"}
+          </div>
+
+          <div
+            style={{
+              marginTop: 16,
+              padding: 18,
+              borderRadius: 18,
+              background: "rgba(255,255,255,0.78)",
+              border: "1px solid var(--border)"
+            }}
+          >
+            <div style={{ color: "var(--muted)", fontSize: 14 }}>家庭邀请码</div>
+            <div style={{ marginTop: 8, fontSize: 32, fontWeight: 900, letterSpacing: "0.14em" }}>
+              {(household?.family_code as string | null) ?? "未生成"}
+            </div>
+            <p style={{ margin: "10px 0 14px", color: "var(--muted)", lineHeight: 1.6 }}>
+              把这个邀请码发给家人。家人注册自己的账号后，在成员端输入邀请码即可加入家庭。
+            </p>
+            <RefreshFamilyCodeButton />
           </div>
         </div>
 

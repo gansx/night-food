@@ -1,12 +1,11 @@
-import { formatDateTime, getInvitationStatusLabel, getMemberStatusLabel, getRoleDisplayName } from "@night-food/lib";
+import { formatDateTime, getMemberStatusLabel, getRoleDisplayName } from "@night-food/lib";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../_components/admin-shell";
 import { getAdminViewerSummary } from "../../lib/auth";
 import { createSupabaseServerClient } from "../../lib/supabase/server-client";
-import { InviteMemberForm } from "./_components/invite-member-form";
+import { RefreshFamilyCodeButton } from "../settings/_components/refresh-family-code-button";
 import { MemberAccessForm } from "./_components/member-access-form";
-import { RevokeInvitationButton } from "./_components/revoke-invitation-button";
 
 export default async function MembersPage() {
   const viewer = await getAdminViewerSummary();
@@ -32,24 +31,46 @@ export default async function MembersPage() {
   }
 
   const supabase = await createSupabaseServerClient();
-  const [{ data: members }, { data: invitations }] = await Promise.all([
+  const [membersResult, householdResult] = await Promise.all([
     supabase
       .from("household_members")
-      .select("id, role, status, user_id, joined_at, profiles(display_name, phone)")
+      .select("id, role, status, user_id, joined_at, profiles(display_name, username, phone)")
       .eq("household_id", viewer.householdId)
       .order("created_at", { ascending: true }),
     supabase
-      .from("household_invitations")
-      .select("id, email, role, status, expires_at")
-      .eq("household_id", viewer.householdId)
-      .order("created_at", { ascending: false })
-      .limit(10)
+      .from("households")
+      .select("name, family_code, family_code_updated_at")
+      .eq("id", viewer.householdId)
+      .limit(1)
+      .maybeSingle()
   ]);
+  let members: Array<Record<string, any>> | null = membersResult.data;
+  if (membersResult.error?.message.toLowerCase().includes("username")) {
+    const { data: fallbackMembers } = await supabase
+      .from("household_members")
+      .select("id, role, status, user_id, joined_at, profiles(display_name, phone)")
+      .eq("household_id", viewer.householdId)
+      .order("created_at", { ascending: true });
+    members = fallbackMembers;
+  }
+  let household: Record<string, any> | null = householdResult.data;
+
+  if (householdResult.error?.message.toLowerCase().includes("family_code")) {
+    const { data: fallbackHousehold } = await supabase
+      .from("households")
+      .select("name, slug")
+      .eq("id", viewer.householdId)
+      .limit(1)
+      .maybeSingle();
+    household = fallbackHousehold
+      ? { ...fallbackHousehold, family_code: fallbackHousehold.slug, family_code_updated_at: null }
+      : null;
+  }
 
   return (
     <AdminShell
       title="成员管理"
-      description="邀请家人、调整角色与状态，并管理待接受邀请。"
+      description="通过家庭邀请码让家人加入，并在这里调整角色与访问状态。"
     >
       <section style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>
@@ -59,6 +80,7 @@ export default async function MembersPage() {
               members?.map((member) => {
                 const profile = Array.isArray(member.profiles) ? member.profiles[0] : member.profiles;
                 const displayName = (profile?.display_name as string | undefined) ?? "未命名成员";
+                const username = (profile?.username as string | undefined) ?? "未设置账号";
                 const phone = (profile?.phone as string | undefined) ?? "未填写手机号";
                 return (
                   <article
@@ -77,6 +99,8 @@ export default async function MembersPage() {
                       </span>
                     </div>
                     <div style={{ marginTop: 8, color: "var(--muted)", lineHeight: 1.7 }}>
+                      账号：{username}
+                      <br />
                       状态：{getMemberStatusLabel(member.status as "active" | "inactive" | "removed")}
                       <br />
                       手机：{phone}
@@ -105,49 +129,32 @@ export default async function MembersPage() {
               </div>
             )}
           </div>
-
-          <h2 style={{ margin: "24px 0 0", fontSize: 20 }}>最近邀请</h2>
-          <div style={{ marginTop: 18, display: "grid", gap: 14 }}>
-            {(invitations ?? []).length ? (
-              invitations?.map((invitation) => (
-                <div
-                  key={invitation.id as string}
-                  style={{
-                    padding: 16,
-                    borderRadius: 18,
-                    background: "rgba(255,255,255,0.72)",
-                    border: "1px solid var(--border)",
-                    display: "grid",
-                    gap: 10
-                  }}
-                >
-                  <div style={{ lineHeight: 1.7 }}>
-                    {invitation.email as string} | {getRoleDisplayName(invitation.role as "owner" | "member")} |{" "}
-                    {getInvitationStatusLabel(invitation.status as never)} | 截止{" "}
-                    {formatDateTime(invitation.expires_at as string)}
-                  </div>
-                  {invitation.status === "pending" ? (
-                    <RevokeInvitationButton invitationId={invitation.id as string} />
-                  ) : null}
-                </div>
-              ))
-            ) : (
-              <div
-                style={{
-                  padding: 16,
-                  borderRadius: 18,
-                  background: "rgba(255,255,255,0.72)",
-                  border: "1px solid var(--border)",
-                  color: "var(--muted)"
-                }}
-              >
-                还没有发出邀请。
-              </div>
-            )}
-          </div>
         </div>
 
-        <InviteMemberForm householdId={viewer.householdId} />
+        <aside className="admin-panel" style={{ padding: 24, alignSelf: "start" }}>
+          <div style={{ color: "var(--brand)", fontWeight: 700 }}>家庭邀请码</div>
+          <h2 style={{ margin: "10px 0 0", fontSize: 20 }}>{household?.name ?? "当前家庭"}</h2>
+          <div
+            style={{
+              marginTop: 18,
+              padding: 18,
+              borderRadius: 20,
+              background: "rgba(255,255,255,0.78)",
+              border: "1px solid var(--border)"
+            }}
+          >
+            <div style={{ color: "var(--muted)", fontSize: 14 }}>把这个码发给家人</div>
+            <div style={{ marginTop: 8, fontSize: 34, fontWeight: 900, letterSpacing: "0.14em" }}>
+              {(household?.family_code as string | null) ?? "未生成"}
+            </div>
+            <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.7 }}>
+              家人注册账号后，打开成员端的家庭引导页，输入这个邀请码即可加入。刷新后旧邀请码会失效。
+            </p>
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <RefreshFamilyCodeButton />
+          </div>
+        </aside>
       </section>
     </AdminShell>
   );

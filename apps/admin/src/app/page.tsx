@@ -112,7 +112,9 @@ export default async function AdminHomePage() {
           <div className="admin-panel" style={{ padding: 18, minWidth: 280, background: "rgba(255,255,255,0.76)" }}>
             <div style={{ color: "var(--muted)", fontSize: 14 }}>当前登录</div>
             <div style={{ marginTop: 8, fontSize: 24, fontWeight: 800 }}>{viewer.roleLabel}</div>
-            <div style={{ marginTop: 10, color: "var(--muted)" }}>{viewer.email}</div>
+            <div style={{ marginTop: 10, color: "var(--muted)" }}>
+              {viewer.displayName || viewer.username || "已登录"}
+            </div>
           </div>
         </div>
 
@@ -152,7 +154,7 @@ export default async function AdminHomePage() {
             <div>
               <strong>你还没有创建家庭。</strong>
               <div style={{ marginTop: 6, color: "var(--muted)" }}>
-                先完成家庭初始化，后续才能邀请家人、设置菜单和管理积分。
+                先完成家庭初始化，后续才能分享家庭邀请码、设置菜单和管理积分。
               </div>
             </div>
             <Link
