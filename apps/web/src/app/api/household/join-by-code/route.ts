@@ -5,6 +5,8 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server-client";
 import { createSupabaseServiceRoleClient } from "../../../../lib/supabase/service-role-client";
 
+type ServiceSupabaseClient = ReturnType<typeof createSupabaseServiceRoleClient>;
+
 const joinSchema = z.object({
   familyCode: z
     .string()
@@ -13,6 +15,34 @@ const joinSchema = z.object({
     .max(12, "邀请码长度不正确")
     .transform(normalizeFamilyCode)
 });
+
+async function getProfileForUser(serviceSupabase: ServiceSupabaseClient, userId: string) {
+  const { data: profile, error } = await serviceSupabase
+    .from("profiles")
+    .select("username, display_name")
+    .eq("user_id", userId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error?.message.toLowerCase().includes("username")) {
+    const { data: fallbackProfile } = await serviceSupabase
+      .from("profiles")
+      .select("display_name")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle();
+
+    return {
+      username: null,
+      displayName: (fallbackProfile?.display_name as string | null) ?? null
+    };
+  }
+
+  return {
+    username: (profile?.username as string | null) ?? null,
+    displayName: (profile?.display_name as string | null) ?? null
+  };
+}
 
 export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient();
@@ -75,17 +105,12 @@ export async function POST(request: Request) {
   }
 
   const householdId = household.id as string;
-  const { data: profile } = await serviceSupabase
-    .from("profiles")
-    .select("username, display_name")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
+  const profile = await getProfileForUser(serviceSupabase, user.id);
 
   const profileRecord = {
     user_id: user.id,
-    username: (profile?.username as string | null) ?? `member_${user.id.replace(/-/g, "").slice(0, 8)}`,
-    display_name: (profile?.display_name as string | null) ?? buildDisplayNameFallback(user.id)
+    username: profile.username ?? `member_${user.id.replace(/-/g, "").slice(0, 8)}`,
+    display_name: profile.displayName ?? buildDisplayNameFallback(user.id)
   };
   const { error: profileUpsertError } = await serviceSupabase.from("profiles").upsert(profileRecord, {
     onConflict: "user_id"

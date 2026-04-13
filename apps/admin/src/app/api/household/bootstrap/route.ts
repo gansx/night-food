@@ -5,6 +5,36 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "../../../../lib/supabase/server-client";
 import { createSupabaseServiceRoleClient } from "../../../../lib/supabase/service-role-client";
 
+type ServiceSupabaseClient = ReturnType<typeof createSupabaseServiceRoleClient>;
+
+async function getProfileForUser(serviceSupabase: ServiceSupabaseClient, userId: string) {
+  const { data: profile, error } = await serviceSupabase
+    .from("profiles")
+    .select("username, display_name")
+    .eq("user_id", userId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error?.message.toLowerCase().includes("username")) {
+    const { data: fallbackProfile } = await serviceSupabase
+      .from("profiles")
+      .select("display_name")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle();
+
+    return {
+      username: null,
+      displayName: (fallbackProfile?.display_name as string | null) ?? null
+    };
+  }
+
+  return {
+    username: (profile?.username as string | null) ?? null,
+    displayName: (profile?.display_name as string | null) ?? null
+  };
+}
+
 const bootstrapSchema = z.object({
   householdName: z.string().trim().min(2, "家庭名称至少 2 个字符").max(40, "家庭名称不要超过 40 个字符"),
   displayName: z.string().trim().max(24, "昵称不要超过 24 个字符").optional().or(z.literal(""))
@@ -40,17 +70,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "你已经加入了一个家庭，无需重复创建。", redirectTo: "/members" }, { status: 409 });
   }
 
-  const { data: profile } = await serviceSupabase
-    .from("profiles")
-    .select("username, display_name")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
+  const profile = await getProfileForUser(serviceSupabase, user.id);
 
-  const displayName = parsed.data.displayName?.trim() || (profile?.display_name as string | null) || buildDisplayNameFallback(user.id);
+  const displayName = parsed.data.displayName?.trim() || profile.displayName || buildDisplayNameFallback(user.id);
   const profileRecord = {
     user_id: user.id,
-    username: (profile?.username as string | null) ?? `member_${user.id.replace(/-/g, "").slice(0, 8)}`,
+    username: profile.username ?? `member_${user.id.replace(/-/g, "").slice(0, 8)}`,
     display_name: displayName,
     updated_at: new Date().toISOString()
   };
