@@ -16,17 +16,18 @@ const registerSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const raw = (await request.json()) as RegisterAccountPayload;
-  const parsed = registerSchema.safeParse(raw);
+  try {
+    const raw = (await request.json()) as RegisterAccountPayload;
+    const parsed = registerSchema.safeParse(raw);
 
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "参数错误" }, { status: 400 });
-  }
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "参数错误" }, { status: 400 });
+    }
 
-  const username = normalizeUsername(parsed.data.username);
-  const displayName = parsed.data.displayName?.trim() || buildDisplayNameFallback(username);
-  const internalEmail = createAuthEmailFromUsername(username);
-  const serviceSupabase = createSupabaseServiceRoleClient();
+    const username = normalizeUsername(parsed.data.username);
+    const displayName = parsed.data.displayName?.trim() || buildDisplayNameFallback(username);
+    const internalEmail = createAuthEmailFromUsername(username);
+    const serviceSupabase = createSupabaseServiceRoleClient();
 
   const { data: existingProfile, error: existingProfileError } = await serviceSupabase
     .from("profiles")
@@ -78,5 +79,9 @@ export async function POST(request: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, username });
+    return NextResponse.json({ ok: true, username });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "注册服务异常";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
