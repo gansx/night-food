@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../_components/admin-shell";
 import { getAdminViewerSummary } from "../../lib/auth";
-import { createSupabaseServerClient } from "../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { HouseholdSettingsForm } from "./_components/household-settings-form";
 import { RefreshFamilyCodeButton } from "./_components/refresh-family-code-button";
 
@@ -30,7 +30,7 @@ export default async function SettingsPage() {
     );
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [{ data: settings }, householdResult] = await Promise.all([
     supabase
       .from("household_settings")

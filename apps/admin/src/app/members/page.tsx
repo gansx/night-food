@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../_components/admin-shell";
 import { getAdminViewerSummary } from "../../lib/auth";
-import { createSupabaseServerClient } from "../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { RefreshFamilyCodeButton } from "../settings/_components/refresh-family-code-button";
 import { MemberAccessForm } from "./_components/member-access-form";
 
@@ -30,7 +30,7 @@ export default async function MembersPage() {
     );
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [membersResult, householdResult] = await Promise.all([
     supabase
       .from("household_members")

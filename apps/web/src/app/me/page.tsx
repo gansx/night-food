@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberShell } from "../_components/member-shell";
 import { getWebViewerSummary } from "../../lib/auth";
-import { createSupabaseServerClient } from "../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { ProfileForm } from "./_components/profile-form";
 
 export default async function MePage({
@@ -22,7 +22,7 @@ export default async function MePage({
   const from = (currentPage - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [profileResult, { data: account }, { data: transactions, count }, householdResult] = await Promise.all([
     supabase.from("profiles").select("username, display_name, phone").eq("user_id", viewer.userId).limit(1).maybeSingle(),
     viewer.householdId

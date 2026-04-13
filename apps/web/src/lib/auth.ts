@@ -1,5 +1,6 @@
 import { getRoleDisplayName, getUsernameFromAuthEmail } from "@night-food/lib";
 import { createSupabaseServerClient } from "./supabase/server-client";
+import { createSupabaseServiceRoleClient } from "./supabase/service-role-client";
 
 export type WebViewerSummary = {
   userId: string;
@@ -22,15 +23,16 @@ export async function getWebViewerSummary(): Promise<WebViewerSummary | null> {
       return null;
     }
 
+    const serviceSupabase = createSupabaseServiceRoleClient();
     const [{ data: membership }, profileResult] = await Promise.all([
-      supabase
+      serviceSupabase
         .from("household_members")
         .select("role, household_id, status")
         .eq("user_id", user.id)
         .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle(),
-      supabase
+      serviceSupabase
         .from("profiles")
         .select("username, display_name")
         .eq("user_id", user.id)
@@ -39,7 +41,7 @@ export async function getWebViewerSummary(): Promise<WebViewerSummary | null> {
     ]);
     let profile: Record<string, unknown> | null = profileResult.data;
     if (profileResult.error?.message.toLowerCase().includes("username")) {
-      const { data: fallbackProfile } = await supabase
+      const { data: fallbackProfile } = await serviceSupabase
         .from("profiles")
         .select("display_name")
         .eq("user_id", user.id)
