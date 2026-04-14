@@ -20,7 +20,7 @@ export default async function SettingsPage() {
 
   if (!viewer.householdId) {
     return (
-      <AdminShell title="规则设置" description="你还没有家庭空间，先完成家庭初始化。">
+      <AdminShell title="规则设置" description="你还没有家庭空间，先完成家庭初始化。" activeHref="/settings">
         <section className="admin-panel" style={{ padding: 24 }}>
           <Link href="/setup/owner" style={{ color: "var(--brand)", fontWeight: 700 }}>
             立即创建家庭
@@ -74,6 +74,7 @@ export default async function SettingsPage() {
     <AdminShell
       title="规则设置"
       description="配置点餐开关、时间窗、任务审核、积分规则、家庭公告和家庭邀请码。"
+      activeHref="/settings"
     >
       <section style={{ display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>

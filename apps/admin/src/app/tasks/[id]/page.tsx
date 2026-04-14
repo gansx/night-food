@@ -46,7 +46,7 @@ export default async function AdminTaskDetailPage({
 
   if (!task) {
     return (
-      <AdminShell title="任务详情" description="没有找到这个任务。">
+      <AdminShell title="任务详情" description="没有找到这个任务。" activeHref="/tasks">
         <section className="admin-panel" style={{ padding: 24 }}>
           <Link href="/tasks" style={{ color: "var(--brand)", fontWeight: 700 }}>
             返回任务列表
@@ -59,7 +59,7 @@ export default async function AdminTaskDetailPage({
   const assignedProfile = Array.isArray(task.profiles) ? task.profiles[0] : task.profiles;
 
   return (
-    <AdminShell title="任务详情" description="查看任务日志、审批结果和任务状态控制。">
+    <AdminShell title="任务详情" description="查看任务日志、审批结果和任务状态控制。" activeHref="/tasks">
       <section style={{ display: "grid", gridTemplateColumns: "1fr 0.95fr", gap: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>
           <Link href="/tasks" style={{ color: "var(--brand)", fontWeight: 700 }}>

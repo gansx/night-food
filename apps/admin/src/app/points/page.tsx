@@ -22,7 +22,7 @@ export default async function PointsPage({
 
   if (!viewer.householdId) {
     return (
-      <AdminShell title="积分管理" description="你还没有家庭空间，先完成家庭初始化。">
+      <AdminShell title="积分管理" description="你还没有家庭空间，先完成家庭初始化。" activeHref="/points">
         <section className="admin-panel" style={{ padding: 24 }}>
           <Link href="/setup/owner" style={{ color: "var(--brand)", fontWeight: 700 }}>
             立即创建家庭
@@ -59,6 +59,7 @@ export default async function PointsPage({
     <AdminShell
       title="积分管理"
       description="查看家庭积分统计、核对流水，并支持家主手动加减积分。"
+      activeHref="/points"
     >
       <section style={{ display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>

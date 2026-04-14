@@ -43,7 +43,7 @@ export default async function AdminOrderDetailPage({
 
   if (!order) {
     return (
-      <AdminShell title="订单详情" description="没有找到这个订单。">
+      <AdminShell title="订单详情" description="没有找到这个订单。" activeHref="/orders">
         <section className="admin-panel" style={{ padding: 24 }}>
           <Link href="/orders" style={{ color: "var(--brand)", fontWeight: 700 }}>
             返回订单列表
@@ -54,7 +54,7 @@ export default async function AdminOrderDetailPage({
   }
 
   return (
-    <AdminShell title="订单详情" description="查看订单明细、状态流转和家主备注。">
+    <AdminShell title="订单详情" description="查看订单明细、状态流转和家主备注。" activeHref="/orders">
       <section style={{ display: "grid", gridTemplateColumns: "1fr 0.95fr", gap: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>
           <Link href="/orders" style={{ color: "var(--brand)", fontWeight: 700 }}>

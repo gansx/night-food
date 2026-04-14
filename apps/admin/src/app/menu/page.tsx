@@ -26,7 +26,7 @@ export default async function MenuPage({
 
   if (!viewer.householdId) {
     return (
-      <AdminShell title="菜单管理" description="你还没有家庭空间，先完成家庭初始化。">
+      <AdminShell title="菜单管理" description="你还没有家庭空间，先完成家庭初始化。" activeHref="/menu">
         <section className="admin-panel" style={{ padding: 24 }}>
           <Link href="/setup/owner" style={{ color: "var(--brand)", fontWeight: 700 }}>
             立即创建家庭
@@ -85,6 +85,7 @@ export default async function MenuPage({
     <AdminShell
       title="菜单管理"
       description="维护分类、推荐菜、搜索筛选和批量上下架。"
+      activeHref="/menu"
     >
       <section style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>

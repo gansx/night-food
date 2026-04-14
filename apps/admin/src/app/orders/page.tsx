@@ -28,7 +28,7 @@ export default async function AdminOrdersPage() {
 
   if (!viewer.householdId) {
     return (
-      <AdminShell title="订单管理" description="你还没有家庭空间，先完成家庭初始化。">
+      <AdminShell title="订单管理" description="你还没有家庭空间，先完成家庭初始化。" activeHref="/orders">
         <section className="admin-panel" style={{ padding: 24 }}>
           <Link href="/setup/owner" style={{ color: "var(--brand)", fontWeight: 700 }}>
             立即创建家庭
@@ -72,6 +72,7 @@ export default async function AdminOrdersPage() {
     <AdminShell
       title="订单管理"
       description="查看全部家庭订单，并推进确认、制作、完成与取消等状态。"
+      activeHref="/orders"
     >
       <section className="admin-panel" style={{ padding: 24 }}>
         <h2 style={{ margin: 0, fontSize: 20 }}>待处理订单</h2>

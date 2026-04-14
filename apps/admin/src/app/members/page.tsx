@@ -20,7 +20,7 @@ export default async function MembersPage() {
 
   if (!viewer.householdId) {
     return (
-      <AdminShell title="成员管理" description="你还没有家庭空间，先完成家庭初始化后再邀请家人。">
+      <AdminShell title="成员管理" description="你还没有家庭空间，先完成家庭初始化后再邀请家人。" activeHref="/members">
         <section className="admin-panel" style={{ padding: 24 }}>
           <Link href="/setup/owner" style={{ color: "var(--brand)", fontWeight: 700 }}>
             立即创建家庭
@@ -71,6 +71,7 @@ export default async function MembersPage() {
     <AdminShell
       title="成员管理"
       description="通过家庭邀请码让家人加入，并在这里调整角色与访问状态。"
+      activeHref="/members"
     >
       <section style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>

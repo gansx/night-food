@@ -6,12 +6,16 @@ import { LogoutButton } from "./logout-button";
 export function AdminShell({
   title,
   description,
+  activeHref = "",
   children
 }: {
   title: string;
   description: string;
+  activeHref?: string;
   children: React.ReactNode;
 }) {
+  const isActive = (href: string) => activeHref === href || activeHref.startsWith(`${href}/`);
+
   return (
     <main className="admin-shell">
       <header className="admin-panel shell-hero">
@@ -37,7 +41,8 @@ export function AdminShell({
             <Link
               key={item.href}
               href={item.href as Route}
-              className="nav-card"
+              className={`nav-card${isActive(item.href) ? " is-active" : ""}`}
+              aria-current={isActive(item.href) ? "page" : undefined}
             >
               <div style={{ fontWeight: 700 }}>{item.label}</div>
               <div style={{ marginTop: 6, color: "var(--muted)", fontSize: 13 }}>
@@ -50,7 +55,12 @@ export function AdminShell({
       {children}
       <nav className="mobile-bottom-nav">
         {adminPrimaryNav.map((item) => (
-          <Link key={item.href} href={item.href as Route}>
+          <Link
+            key={item.href}
+            href={item.href as Route}
+            className={isActive(item.href) ? "is-active" : undefined}
+            aria-current={isActive(item.href) ? "page" : undefined}
+          >
             {item.label.replace("管理", "")}
           </Link>
         ))}

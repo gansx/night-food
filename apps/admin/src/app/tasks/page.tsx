@@ -27,7 +27,7 @@ export default async function AdminTasksPage({
 
   if (!viewer.householdId) {
     return (
-      <AdminShell title="任务管理" description="你还没有家庭空间，先完成家庭初始化。">
+      <AdminShell title="任务管理" description="你还没有家庭空间，先完成家庭初始化。" activeHref="/tasks">
         <section className="admin-panel" style={{ padding: 24 }}>
           <Link href="/setup/owner" style={{ color: "var(--brand)", fontWeight: 700 }}>
             立即创建家庭
@@ -61,6 +61,7 @@ export default async function AdminTasksPage({
     <AdminShell
       title="任务管理"
       description="发布家庭任务、筛选状态、查看详情和审批积分结算。"
+      activeHref="/tasks"
     >
       <section style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>
