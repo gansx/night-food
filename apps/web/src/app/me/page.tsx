@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { LogoutButton } from "../_components/logout-button";
 import { MemberShell } from "../_components/member-shell";
 import { getWebViewerSummary } from "../../lib/auth";
 import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
@@ -23,8 +24,20 @@ export default async function MePage({
   const to = from + pageSize - 1;
 
   const supabase = createSupabaseServiceRoleClient();
-  const [profileResult, { data: account }, { data: transactions, count }, householdResult] = await Promise.all([
-    supabase.from("profiles").select("username, display_name, phone").eq("user_id", viewer.userId).limit(1).maybeSingle(),
+  const [
+    profileResult,
+    { data: account },
+    { data: transactions, count },
+    householdResult,
+    { data: settings },
+    { data: recentOrders }
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("username, display_name, phone")
+      .eq("user_id", viewer.userId)
+      .limit(1)
+      .maybeSingle(),
     viewer.householdId
       ? supabase
           .from("points_accounts")
@@ -50,7 +63,24 @@ export default async function MePage({
           .eq("id", viewer.householdId)
           .limit(1)
           .maybeSingle()
-      : Promise.resolve({ data: null })
+      : Promise.resolve({ data: null }),
+    viewer.householdId
+      ? supabase
+          .from("household_settings")
+          .select("ordering_enabled")
+          .eq("household_id", viewer.householdId)
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    viewer.householdId
+      ? supabase
+          .from("orders")
+          .select("id, order_number, status, total_points, created_at")
+          .eq("household_id", viewer.householdId)
+          .eq("member_user_id", viewer.userId)
+          .order("created_at", { ascending: false })
+          .limit(3)
+      : Promise.resolve({ data: [] as Array<Record<string, unknown>> })
   ]);
   let profile: Record<string, any> | null = profileResult.data;
   if (profileResult.error?.message.toLowerCase().includes("username")) {
@@ -113,6 +143,47 @@ export default async function MePage({
           </Link>
         </section>
       ) : null}
+
+      <section className="glass-panel" style={{ padding: 24, marginBottom: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 18,
+            alignItems: "flex-start",
+            flexWrap: "wrap"
+          }}
+        >
+          <div>
+            <div className="brand-kicker">My Orbit</div>
+            <h2 className="section-title" style={{ marginTop: 10 }}>
+              当前状态
+            </h2>
+            <div style={{ marginTop: 8, color: "var(--text-muted)" }}>
+              {(profile?.display_name as string | undefined) || viewer.displayName || viewer.username || "家庭成员"}
+            </div>
+          </div>
+          <LogoutButton />
+        </div>
+
+        <div
+          style={{
+            marginTop: 20,
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+            gap: 12
+          }}
+        >
+          <StatusTile label="当前身份" value={viewer.roleLabel} />
+          <StatusTile label="当前积分" value={String(account?.balance ?? 0)} accent="var(--brand)" />
+          <StatusTile
+            label="点餐状态"
+            value={settings?.ordering_enabled === false ? "已暂停" : "开放中"}
+            accent="var(--accent)"
+          />
+          <StatusTile label="最近订单" value={String((recentOrders ?? []).length)} accent="#9f7aea" />
+        </div>
+      </section>
 
       <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         <div style={{ display: "grid", gap: 20 }}>
@@ -206,3 +277,27 @@ const pagerStyle = {
   background: "rgba(255,255,255,0.76)",
   border: "1px solid var(--border-soft)"
 } satisfies React.CSSProperties;
+
+function StatusTile({
+  label,
+  value,
+  accent = "var(--text-strong)"
+}: {
+  label: string;
+  value: string;
+  accent?: string;
+}) {
+  return (
+    <div
+      style={{
+        borderRadius: 20,
+        padding: "16px 18px",
+        background: "rgba(255,255,255,0.72)",
+        border: "1px solid var(--border-soft)"
+      }}
+    >
+      <div style={{ color: "var(--text-muted)", fontSize: 14 }}>{label}</div>
+      <div style={{ marginTop: 8, color: accent, fontSize: 24, fontWeight: 900 }}>{value}</div>
+    </div>
+  );
+}
