@@ -2,8 +2,12 @@ import assert from "node:assert/strict";
 import {
   canTransitionOrderStatus,
   canTransitionTaskStatus,
+  createFamilyCode,
+  createAuthEmailFromUsername,
   formatOrderingWindow,
+  getUsernameFromAuthEmail,
   getInvitationStatusLabel,
+  isValidUsername,
   normalizeEmail
 } from "../packages/lib/src/index.ts";
 
@@ -16,6 +20,19 @@ function run(name, fn) {
 
 run("normalizeEmail trims and lowercases", () => {
   assert.equal(normalizeEmail("  FAMILY@Example.com "), "family@example.com");
+});
+
+run("username auth helpers map public usernames to internal emails", () => {
+  assert.equal(isValidUsername("owner_01"), true);
+  assert.equal(isValidUsername("bad user"), false);
+  assert.equal(createAuthEmailFromUsername(" Owner_01 "), "owner_01@users.night-food.local");
+  assert.equal(getUsernameFromAuthEmail("owner_01@users.night-food.local"), "owner_01");
+});
+
+run("family codes use the household-safe alphabet", () => {
+  const code = createFamilyCode(12);
+  assert.equal(code.length, 12);
+  assert.match(code, /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]+$/);
 });
 
 run("formatOrderingWindow returns all-day fallback", () => {

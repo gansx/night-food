@@ -16,9 +16,9 @@ You will need these values:
 
 In Supabase Authentication:
 
-- enable `Email` sign-in
-- enable magic link login
-- add redirect URLs for both apps
+- enable email/password auth
+- keep email confirmation disabled for the current username/password test flow
+- add redirect URLs for both apps if you later enable callback-based auth
 
 Local callback URLs:
 
@@ -59,11 +59,13 @@ Run the SQL files in `supabase/migrations` in this order:
 3. `0003_household_ordering_window.sql`
 4. `0004_security_storage_audit.sql`
 5. `0005_menu_featured_and_audit_indexes.sql`
+6. `0006_username_family_code.sql`
+7. `0007_order_refund_idempotency.sql`
 
 This creates:
 
 - household, member, menu, order, task, points tables
-- invitation flow tables
+- username login and household family code fields
 - RLS and audit log support
 - storage bucket metadata for menu images
 - featured menu item support
@@ -83,7 +85,7 @@ Open:
 ## 6. Bootstrap the first household
 
 1. Open the admin app.
-2. Log in with the future owner email.
+2. Register or log in with the future owner username and password.
 3. Go to `/setup/owner`.
 4. Create the household and owner profile.
 
@@ -122,9 +124,9 @@ select public.seed_household_demo(
 1. Owner logs into admin.
 2. Owner confirms household settings can be saved.
 3. Owner creates menu categories and menu items.
-4. Owner generates an invite link from `/members`.
-5. Member logs into the web app with the invited email.
-6. Member opens the invite link and accepts.
+4. Owner copies the family code from `/members` or `/settings`.
+5. Member registers their own username and password in the web app.
+6. Member enters the family code at `/family` and joins.
 7. Member browses menu and places an order.
 8. Owner confirms the order and completes it.
 9. Owner creates a task.

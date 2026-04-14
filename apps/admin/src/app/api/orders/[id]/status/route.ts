@@ -52,16 +52,23 @@ export async function POST(
     );
   }
 
-  const { error: updateError } = await supabase
+  const { data: updatedOrder, error: updateError } = await supabase
     .from("orders")
     .update({
       status: targetStatus,
       updated_at: new Date().toISOString()
     })
-    .eq("id", order.id);
+    .eq("id", order.id)
+    .eq("status", currentStatus)
+    .select("id")
+    .maybeSingle();
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
+  }
+
+  if (!updatedOrder) {
+    return NextResponse.json({ error: "订单状态已变化，请刷新后再操作。" }, { status: 409 });
   }
 
   await supabase.from("order_status_logs").insert({
@@ -93,17 +100,7 @@ export async function POST(
 
       const nextBalance = Number(account?.balance ?? 0) + Number(order.total_points);
 
-      await supabase.from("points_accounts").upsert(
-        {
-          household_id: order.household_id,
-          user_id: order.member_user_id,
-          balance: nextBalance,
-          updated_at: new Date().toISOString()
-        },
-        { onConflict: "household_id,user_id" }
-      );
-
-      await supabase.from("points_transactions").insert({
+      const { error: refundInsertError } = await supabase.from("points_transactions").insert({
         household_id: order.household_id,
         user_id: order.member_user_id,
         source_type: "order",
@@ -113,6 +110,22 @@ export async function POST(
         balance_after: nextBalance,
         description: `订单 ${order.order_number} 已取消，积分退回`
       });
+
+      if (refundInsertError && refundInsertError.code !== "23505") {
+        return NextResponse.json({ error: refundInsertError.message }, { status: 500 });
+      }
+
+      if (!refundInsertError) {
+        await supabase.from("points_accounts").upsert(
+          {
+            household_id: order.household_id,
+            user_id: order.member_user_id,
+            balance: nextBalance,
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: "household_id,user_id" }
+        );
+      }
     }
   }
 

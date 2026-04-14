@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   title: "家宴星球",
   description: "Family ordering, tasks, points, and household coordination.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/icon.svg"
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

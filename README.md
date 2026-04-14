@@ -26,7 +26,7 @@ The repository now includes:
 
 - household-oriented web and admin apps
 - Supabase schema and bootstrap flow
-- household invitation, ordering, task, points, member, and menu management flows
+- username/password auth, household family code join, ordering, task, points, member, and menu management flows
 - P0 go-live checklist and starter seed assets
 - phase 1 live setup and acceptance runbooks
 
@@ -41,7 +41,8 @@ pnpm --filter @night-food/web dev
 pnpm --filter @night-food/admin dev
 ```
 
-4. Follow [docs/p0-go-live-checklist.md](/C:/Users/gsx/Documents/New%20project%202/docs/p0-go-live-checklist.md).
+4. Register a family owner account in the admin app, create a household, then share the family code with members.
+5. Follow [docs/p0-go-live-checklist.md](/C:/Users/gsx/Documents/New%20project%202/docs/p0-go-live-checklist.md).
 
 For the first real connected environment, also use:
 

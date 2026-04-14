@@ -139,8 +139,9 @@ This module is the owner control center.
 - account login
 - profile editing
 - avatar upload
-- household membership listing
-- current household selection
+- household family code join
+- household membership status
+- current household display
 
 ## 8. Announcements and Configuration
 
@@ -151,4 +152,3 @@ This module is the owner control center.
 - points redemption rules
 - task approval requirement
 - contact information
-

@@ -7,12 +7,12 @@ test.describe("household smoke", () => {
 
   test("member home renders", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle(/Night Food|Home/i);
+    await expect(page).toHaveTitle(/家宴星球|Night Food|Home/i);
   });
 
   test("admin login renders", async ({ page }) => {
     const adminBaseUrl = process.env.PLAYWRIGHT_ADMIN_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL;
     await page.goto(`${adminBaseUrl}/login`);
-    await expect(page).toHaveTitle(/Night Food|Admin/i);
+    await expect(page).toHaveTitle(/家宴中枢|Night Food|Admin/i);
   });
 });

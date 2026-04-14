@@ -4,16 +4,17 @@ Use this after the real Supabase project is connected.
 
 ## Owner setup
 
-- owner can log into the admin app through magic link
+- owner can register and log into the admin app with username + password
 - owner can create the first household at `/setup/owner`
 - owner sees the dashboard instead of the setup page after bootstrap
 
-## Member invitation
+## Member family-code join
 
-- owner can generate an invite link from `/members`
-- duplicate invite returns the existing pending link instead of creating noise
-- owner can revoke a pending invite
-- invited user can accept the link only with the matching email
+- owner can copy the family code from `/members` or `/settings`
+- owner can refresh the family code and invalidate the previous code
+- member can register with username + password
+- member can join the household by entering the family code at `/family`
+- inactive or removed members cannot continue normal household actions
 
 ## Household rules
 
@@ -39,6 +40,7 @@ Use this after the real Supabase project is connected.
 - blocked ordering window rejects new orders
 - owner can move order status through confirm, preparing, complete
 - cancelled orders refund points exactly once
+- repeated cancellation attempts do not create duplicate refund ledger entries
 
 ## Task flow
 
@@ -57,6 +59,7 @@ Use this after the real Supabase project is connected.
 - owner can manually adjust points
 - member ledger paginates correctly on `/me`
 - owner ledger paginates correctly on `/points`
+- order cancellation refund appears as a single credit ledger entry
 
 ## Permission flow
 

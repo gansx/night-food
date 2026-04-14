@@ -9,6 +9,8 @@ const requiredFiles = [
   "supabase/migrations/0001_initial_household_schema.sql",
   "supabase/migrations/0002_household_auth_foundation.sql",
   "supabase/migrations/0003_household_ordering_window.sql",
+  "supabase/migrations/0006_username_family_code.sql",
+  "supabase/migrations/0007_order_refund_idempotency.sql",
   "supabase/seed/0001_demo_household_content.sql"
 ];
 

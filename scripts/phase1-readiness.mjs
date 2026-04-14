@@ -15,6 +15,8 @@ const requiredFiles = [
   "supabase/migrations/0003_household_ordering_window.sql",
   "supabase/migrations/0004_security_storage_audit.sql",
   "supabase/migrations/0005_menu_featured_and_audit_indexes.sql",
+  "supabase/migrations/0006_username_family_code.sql",
+  "supabase/migrations/0007_order_refund_idempotency.sql",
   "supabase/seed/0001_demo_household_content.sql"
 ];
 

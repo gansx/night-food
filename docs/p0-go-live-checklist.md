@@ -5,7 +5,7 @@ This checklist is the shortest path to a working household demo with the current
 ## 1. Create the Supabase project
 
 - Create a new Supabase project in the region closest to your users.
-- Enable email login in `Authentication -> Providers -> Email`.
+- Keep Supabase Auth enabled for email/password internally. The app exposes username + password registration, and turns usernames into internal auth emails automatically.
 - Copy:
   - `Project URL`
   - `anon public key`
@@ -32,6 +32,10 @@ Run the SQL files in order:
 1. [0001_initial_household_schema.sql](/C:/Users/gsx/Documents/New%20project%202/supabase/migrations/0001_initial_household_schema.sql)
 2. [0002_household_auth_foundation.sql](/C:/Users/gsx/Documents/New%20project%202/supabase/migrations/0002_household_auth_foundation.sql)
 3. [0003_household_ordering_window.sql](/C:/Users/gsx/Documents/New%20project%202/supabase/migrations/0003_household_ordering_window.sql)
+4. [0004_security_storage_audit.sql](/C:/Users/gsx/Documents/New%20project%202/supabase/migrations/0004_security_storage_audit.sql)
+5. [0005_menu_featured_and_audit_indexes.sql](/C:/Users/gsx/Documents/New%20project%202/supabase/migrations/0005_menu_featured_and_audit_indexes.sql)
+6. [0006_username_family_code.sql](/C:/Users/gsx/Documents/New%20project%202/supabase/migrations/0006_username_family_code.sql)
+7. [0007_order_refund_idempotency.sql](/C:/Users/gsx/Documents/New%20project%202/supabase/migrations/0007_order_refund_idempotency.sql)
 
 ## 4. Start local apps
 
@@ -52,12 +56,12 @@ pnpm --filter @night-food/admin dev
 1. Run [0001_demo_household_content.sql](/C:/Users/gsx/Documents/New%20project%202/supabase/seed/0001_demo_household_content.sql).
 2. Call `public.seed_household_demo(...)` with the real owner and household IDs.
 
-## 7. Invite and join family members
+## 7. Join family members with the family code
 
-1. In the admin app, open `/members`.
-2. Generate an invite link.
-3. Open the invite link in the web app while logged in as the invited member.
-4. Accept the invitation.
+1. In the admin app, open `/members` or `/settings`.
+2. Copy the household family code.
+3. Ask the family member to register their own username + password in the web app.
+4. The member opens `/family`, enters the family code, and joins the household.
 
 ## 8. Run the acceptance flow
 
@@ -66,13 +70,13 @@ Owner flow:
 - verify household creation
 - verify settings save
 - verify menu create/edit/delete
-- verify invite creation
+- verify family code join
 - verify order confirm -> preparing -> completed
 - verify task create -> approve
 
 Member flow:
 
-- verify invitation acceptance
+- verify family code acceptance
 - verify profile edit
 - verify menu browsing and ordering
 - verify negative points rule
@@ -83,9 +87,8 @@ Member flow:
 
 - run `pnpm --filter @night-food/web build`
 - run `pnpm --filter @night-food/admin build`
-- confirm OTP login emails are delivered
 - confirm both site URLs match deployed domains
-- confirm invite links point to the correct public web domain
+- confirm family code join works on the public web domain
 
 ## 10. Move into Phase 1
 
