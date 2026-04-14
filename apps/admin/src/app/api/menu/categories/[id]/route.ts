@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createSupabaseServerClient } from "../../../../../lib/supabase/server-client";
+import { getAdminSessionUser } from "../../../../../lib/server/household";
 
 const updateCategorySchema = z.object({
   name: z.string().trim().min(1, "请填写分类名称").max(24, "分类名称不要超过 24 个字符"),
@@ -9,10 +9,7 @@ const updateCategorySchema = z.object({
 });
 
 async function requireOwner(categoryId: string) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAdminSessionUser();
 
   if (!user) {
     return { supabase, error: NextResponse.json({ error: "请先登录。" }, { status: 401 }) };
