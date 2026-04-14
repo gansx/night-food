@@ -7,6 +7,7 @@ on:
       - main
       - codex/family-web-cloudflare
     paths:
+      - ".github/workflows/deploy-web.yml"
       - "apps/web/**"
       - "packages/**"
       - "pnpm-lock.yaml"
@@ -46,10 +47,6 @@ jobs:
       - name: Build web worker
         working-directory: apps/web
         run: pnpm cf:build
-
-      - name: Sync web runtime secret
-        working-directory: apps/web
-        run: printf '%s' "$SUPABASE_SERVICE_ROLE_KEY" | pnpm exec wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 
       - name: Deploy web worker
         working-directory: apps/web
