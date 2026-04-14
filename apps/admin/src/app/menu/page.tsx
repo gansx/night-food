@@ -7,7 +7,7 @@ import { EditCategoryForm } from "./_components/edit-category-form";
 import { EditMenuItemForm } from "./_components/edit-menu-item-form";
 import { AdminShell } from "../_components/admin-shell";
 import { getAdminViewerSummary } from "../../lib/auth";
-import { createSupabaseServerClient } from "../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 
 export default async function MenuPage({
   searchParams
@@ -42,7 +42,7 @@ export default async function MenuPage({
   const statusFilter = status ?? "all";
   const featuredFilter = featured ?? "all";
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [{ data: categories }, { data: items }] = await Promise.all([
     supabase
       .from("menu_categories")
