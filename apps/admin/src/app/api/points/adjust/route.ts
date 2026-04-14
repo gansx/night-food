@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createSupabaseServerClient } from "../../../../lib/supabase/server-client";
+import { requireAdminOwnerMembership } from "../../../../lib/server/household";
 
 const adjustSchema = z.object({
   householdId: z.string().uuid("家庭标识无效"),
@@ -11,15 +11,6 @@ const adjustSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "请先登录。" }, { status: 401 });
-  }
-
   const raw = (await request.json()) as {
     householdId?: string;
     userId?: string;
@@ -36,20 +27,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "参数错误" }, { status: 400 });
   }
 
-  const { data: membership } = await supabase
-    .from("household_members")
-    .select("role")
-    .eq("household_id", parsed.data.householdId)
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-
-  if (!membership || membership.role !== "owner") {
-    return NextResponse.json({ error: "只有家主可以调整积分。" }, { status: 403 });
+  const guard = await requireAdminOwnerMembership(parsed.data.householdId);
+  if (guard.response || !guard.user || !guard.membership) {
+    return guard.response!;
   }
 
-  const { data: account } = await supabase
+  const { data: account } = await guard.supabase
     .from("points_accounts")
     .select("balance")
     .eq("household_id", parsed.data.householdId)
@@ -61,7 +44,7 @@ export async function POST(request: Request) {
   const delta = parsed.data.direction === "credit" ? parsed.data.amount : -parsed.data.amount;
   const nextBalance = currentBalance + delta;
 
-  const { error: accountError } = await supabase.from("points_accounts").upsert(
+  const { error: accountError } = await guard.supabase.from("points_accounts").upsert(
     {
       household_id: parsed.data.householdId,
       user_id: parsed.data.userId,
@@ -75,7 +58,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: accountError.message }, { status: 500 });
   }
 
-  const { error: ledgerError } = await supabase.from("points_transactions").insert({
+  const { error: ledgerError } = await guard.supabase.from("points_transactions").insert({
     household_id: parsed.data.householdId,
     user_id: parsed.data.userId,
     source_type: "manual_adjustment",
@@ -90,9 +73,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: ledgerError.message }, { status: 500 });
   }
 
-  await supabase.from("audit_logs").insert({
+  await guard.supabase.from("audit_logs").insert({
     household_id: parsed.data.householdId,
-    actor_user_id: user.id,
+    actor_user_id: guard.user.id,
     target_type: "points_account",
     target_id: parsed.data.userId,
     action: parsed.data.direction === "credit" ? "manual_credit" : "manual_debit",

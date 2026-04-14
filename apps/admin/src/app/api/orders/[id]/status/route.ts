@@ -2,7 +2,7 @@ import { canTransitionOrderStatus, getOrderStatusLabel } from "@night-food/lib";
 import type { OrderStatus } from "@night-food/types";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createSupabaseServerClient } from "../../../../../lib/supabase/server-client";
+import { getAdminSessionUser, requireAdminOwnerMembership } from "../../../../../lib/server/household";
 
 const updateOrderStatusSchema = z.object({
   status: z.enum(["confirmed", "preparing", "completed", "cancelled"]),
@@ -14,10 +14,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAdminSessionUser();
 
   if (!user) {
     return NextResponse.json({ error: "请先登录。" }, { status: 401 });
@@ -40,17 +37,9 @@ export async function POST(
     return NextResponse.json({ error: "订单不存在。" }, { status: 404 });
   }
 
-  const { data: membership } = await supabase
-    .from("household_members")
-    .select("role")
-    .eq("household_id", order.household_id)
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-
-  if (!membership || membership.role !== "owner") {
-    return NextResponse.json({ error: "只有家主可以更新订单状态。" }, { status: 403 });
+  const guard = await requireAdminOwnerMembership(order.household_id as string);
+  if (guard.response || !guard.membership) {
+    return guard.response!;
   }
 
   const currentStatus = order.status as OrderStatus;

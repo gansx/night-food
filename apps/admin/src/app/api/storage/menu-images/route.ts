@@ -1,18 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
-import { hasServiceRoleEnv } from "../../../../lib/env";
-import { createSupabaseServerClient } from "../../../../lib/supabase/server-client";
-import { createSupabaseServiceRoleClient } from "../../../../lib/supabase/service-role-client";
+import { getAdminSessionUser } from "../../../../lib/server/household";
 
 export async function POST(request: Request) {
-  if (!hasServiceRoleEnv()) {
-    return NextResponse.json({ error: "未配置服务端上传密钥。" }, { status: 500 });
-  }
-
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAdminSessionUser();
 
   if (!user) {
     return NextResponse.json({ error: "请先登录。" }, { status: 401 });
@@ -39,21 +30,18 @@ export async function POST(request: Request) {
 
   const extension = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
   const filePath = `${membership.household_id}/${randomUUID()}.${extension}`;
-  const serviceClient = createSupabaseServiceRoleClient();
   const bytes = await file.arrayBuffer();
 
-  const { error } = await serviceClient.storage
-    .from("menu-images")
-    .upload(filePath, bytes, {
-      contentType: file.type || "image/jpeg",
-      upsert: false
-    });
+  const { error } = await supabase.storage.from("menu-images").upload(filePath, bytes, {
+    contentType: file.type || "image/jpeg",
+    upsert: false
+  });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const { data } = serviceClient.storage.from("menu-images").getPublicUrl(filePath);
+  const { data } = supabase.storage.from("menu-images").getPublicUrl(filePath);
 
   return NextResponse.json({
     path: filePath,

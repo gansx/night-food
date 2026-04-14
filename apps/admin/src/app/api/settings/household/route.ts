@@ -1,7 +1,7 @@
 import type { HouseholdSettingsPayload } from "@night-food/types";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createSupabaseServerClient } from "../../../../lib/supabase/server-client";
+import { requireAdminOwnerMembership } from "../../../../lib/server/household";
 
 const timeValue = z
   .string()
@@ -35,15 +35,6 @@ const settingsSchema = z
   });
 
 export async function POST(request: Request) {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "请先登录。" }, { status: 401 });
-  }
-
   const raw = (await request.json()) as HouseholdSettingsPayload;
   const parsed = settingsSchema.safeParse({
     ...raw,
@@ -54,20 +45,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "参数错误" }, { status: 400 });
   }
 
-  const { data: membership } = await supabase
-    .from("household_members")
-    .select("role")
-    .eq("household_id", parsed.data.householdId)
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-
-  if (!membership || membership.role !== "owner") {
-    return NextResponse.json({ error: "只有家主可以修改家庭规则。" }, { status: 403 });
+  const guard = await requireAdminOwnerMembership(parsed.data.householdId);
+  if (guard.response || !guard.user || !guard.membership) {
+    return guard.response!;
   }
 
-  const { error } = await supabase.from("household_settings").upsert(
+  const { error } = await guard.supabase.from("household_settings").upsert(
     {
       household_id: parsed.data.householdId,
       ordering_enabled: parsed.data.orderingEnabled,

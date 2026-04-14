@@ -1,7 +1,7 @@
 import type { UpdateHouseholdMemberPayload } from "@night-food/types";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createSupabaseServerClient } from "../../../../../lib/supabase/server-client";
+import { getAdminSessionUser, requireAdminOwnerMembership } from "../../../../../lib/server/household";
 
 const updateMemberSchema = z.object({
   memberId: z.string().uuid("成员标识无效"),
@@ -14,10 +14,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAdminSessionUser();
 
   if (!user) {
     return NextResponse.json({ error: "请先登录。" }, { status: 401 });
@@ -44,24 +41,14 @@ export async function PATCH(
     return NextResponse.json({ error: "成员不存在。" }, { status: 404 });
   }
 
-  const { data: actingMembership } = await supabase
-    .from("household_members")
-    .select("role")
-    .eq("household_id", targetMember.household_id)
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-
-  if (!actingMembership || actingMembership.role !== "owner") {
-    return NextResponse.json({ error: "只有家主可以管理成员权限。" }, { status: 403 });
+  const guard = await requireAdminOwnerMembership(targetMember.household_id as string);
+  if (guard.response || !guard.membership) {
+    return guard.response!;
   }
 
-  const isExistingActiveOwner =
-    targetMember.role === "owner" && targetMember.status === "active";
+  const isExistingActiveOwner = targetMember.role === "owner" && targetMember.status === "active";
   const willStopBeingActiveOwner =
-    isExistingActiveOwner &&
-    (parsed.data.role !== "owner" || parsed.data.status !== "active");
+    isExistingActiveOwner && (parsed.data.role !== "owner" || parsed.data.status !== "active");
 
   if (willStopBeingActiveOwner) {
     const { count } = await supabase
