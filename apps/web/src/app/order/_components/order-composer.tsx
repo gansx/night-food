@@ -137,71 +137,50 @@ export function OrderComposer({
                   return (
                     <article
                       key={item.id}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr auto",
-                        gap: 14,
-                        padding: 16,
-                        borderRadius: 18,
-                        background: "rgba(255,255,255,0.72)",
-                        border: "1px solid var(--border-soft)"
-                      }}
+                      className="menu-item-card"
                     >
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: 18 }}>{item.name}</div>
-                        <p
-                          style={{
-                            margin: "8px 0 0",
-                            color: "var(--text-muted)",
-                            lineHeight: 1.6
-                          }}
-                        >
-                          {item.description || "家庭常备菜品"}
-                        </p>
+                      {item.imageUrl ? (
+                        <img className="menu-item-cover" src={item.imageUrl} alt={item.name} />
+                      ) : (
+                        <div className="menu-item-cover menu-item-cover-empty">家宴</div>
+                      )}
+                      <div className="menu-item-info">
+                        <div className="menu-item-name">{item.name}</div>
+                        <div className="menu-item-points">{item.pricePoints} 积分</div>
                       </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{ color: "var(--brand-dark)", fontWeight: 800 }}>
-                          {item.pricePoints} 积分
-                        </div>
-                        <div
-                          style={{
-                            marginTop: 12,
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 8
-                          }}
+                      <div className="menu-item-actions">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuantities((current) => ({
+                              ...current,
+                              [item.id]: Math.max((current[item.id] ?? 0) - 1, 0)
+                            }))
+                          }
+                          style={circleButtonStyle}
+                          aria-label={`减少 ${item.name}`}
                         >
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setQuantities((current) => ({
-                                ...current,
-                                [item.id]: Math.max((current[item.id] ?? 0) - 1, 0)
-                              }))
-                            }
-                            style={circleButtonStyle}
-                          >
-                            -
-                          </button>
-                          <span style={{ minWidth: 24, textAlign: "center" }}>{quantity}</span>
-                          <button
-                            type="button"
-                            disabled={!item.isAvailable}
-                            onClick={() =>
-                              setQuantities((current) => ({
-                                ...current,
-                                [item.id]: (current[item.id] ?? 0) + 1
-                              }))
-                            }
-                            style={{
-                              ...circleButtonStyle,
-                              background: item.isAvailable ? "var(--brand)" : "#c7c0b3",
-                              color: "#fff"
-                            }}
-                          >
-                            +
-                          </button>
-                        </div>
+                          -
+                        </button>
+                        <span style={{ minWidth: 24, textAlign: "center" }}>{quantity}</span>
+                        <button
+                          type="button"
+                          disabled={!item.isAvailable}
+                          onClick={() =>
+                            setQuantities((current) => ({
+                              ...current,
+                              [item.id]: (current[item.id] ?? 0) + 1
+                            }))
+                          }
+                          style={{
+                            ...circleButtonStyle,
+                            background: item.isAvailable ? "var(--brand)" : "#3a332e",
+                            color: item.isAvailable ? "#1c0b05" : "var(--text-muted)"
+                          }}
+                          aria-label={`添加 ${item.name}`}
+                        >
+                          +
+                        </button>
                       </div>
                     </article>
                   );
@@ -317,10 +296,10 @@ export function OrderComposer({
 
 const circleButtonStyle = {
   border: 0,
-  width: 32,
-  height: 32,
+  width: 44,
+  height: 44,
   borderRadius: 999,
-  background: "rgba(214,106,47,0.12)",
+  background: "rgba(239,159,93,0.12)",
   color: "var(--brand-dark)",
   cursor: "pointer"
 } satisfies React.CSSProperties;

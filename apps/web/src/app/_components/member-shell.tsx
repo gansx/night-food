@@ -1,7 +1,5 @@
-import type { Route } from "next";
-import Link from "next/link";
-import { webPrimaryNav } from "@night-food/types";
 import { LogoutButton } from "./logout-button";
+import { MemberNav } from "./member-nav";
 
 export function MemberShell({
   title,
@@ -33,29 +31,10 @@ export function MemberShell({
           </div>
         </div>
 
-        <nav className="primary-nav">
-          {webPrimaryNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href as Route}
-              className="nav-card"
-            >
-              <div style={{ fontWeight: 700 }}>{item.label}</div>
-              <div style={{ color: "var(--text-muted)", fontSize: 13, marginTop: 6 }}>
-                {item.description}
-              </div>
-            </Link>
-          ))}
-        </nav>
+        <MemberNav />
       </header>
       {children}
-      <nav className="mobile-bottom-nav">
-        {webPrimaryNav.map((item) => (
-          <Link key={item.href} href={item.href as Route}>
-            {item.label.replace("家庭", "")}
-          </Link>
-        ))}
-      </nav>
+      <MemberNav variant="mobile" />
     </main>
   );
 }

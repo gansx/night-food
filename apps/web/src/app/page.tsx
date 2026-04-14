@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getOrderStatusLabel, getTaskStatusLabel } from "@night-food/lib";
-import { webPrimaryNav } from "@night-food/types";
 import { LogoutButton } from "./_components/logout-button";
+import { MemberNav } from "./_components/member-nav";
 import { getWebViewerSummary } from "../lib/auth";
 import { createSupabaseServiceRoleClient } from "../lib/supabase/service-role-client";
 
@@ -101,18 +101,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <nav className="primary-nav">
-          {webPrimaryNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="nav-card"
-            >
-              <div style={{ fontWeight: 700 }}>{item.label}</div>
-              <div style={{ marginTop: 6, color: "var(--text-muted)", fontSize: 14 }}>{item.description}</div>
-            </Link>
-          ))}
-        </nav>
+        <MemberNav />
       </section>
 
       {viewer && !viewer.householdId ? (
@@ -229,13 +218,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      <nav className="mobile-bottom-nav">
-        {webPrimaryNav.map((item) => (
-          <Link key={item.href} href={item.href}>
-            {item.label.replace("家庭", "")}
-          </Link>
-        ))}
-      </nav>
+      <MemberNav variant="mobile" />
     </main>
   );
 }

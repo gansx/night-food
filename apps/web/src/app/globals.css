@@ -219,6 +219,75 @@ textarea::placeholder {
   border-color: rgba(239, 159, 93, 0.34) !important;
 }
 
+.nav-card.is-active {
+  color: var(--brand-dark);
+  background:
+    linear-gradient(150deg, rgba(232, 119, 72, 0.22), rgba(239, 159, 93, 0.12)),
+    rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(239, 159, 93, 0.38) !important;
+  box-shadow: inset 0 1px 0 rgba(231, 201, 174, 0.16), 0 14px 34px rgba(232, 119, 72, 0.12);
+}
+
+.menu-item-card {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 22px;
+  background:
+    linear-gradient(150deg, rgba(8, 40, 81, 0.18), rgba(2, 5, 7, 0.1)),
+    rgba(255, 255, 255, 0.045);
+  border: 1px solid var(--border-soft);
+}
+
+.menu-item-cover {
+  width: 104px;
+  height: 86px;
+  border-radius: 18px;
+  object-fit: cover;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(239, 159, 93, 0.24), transparent 44%),
+    linear-gradient(145deg, rgba(8, 40, 81, 0.68), rgba(41, 90, 68, 0.34));
+  border: 1px solid rgba(231, 201, 174, 0.14);
+}
+
+.menu-item-cover-empty {
+  display: grid;
+  place-items: center;
+  color: var(--brand-dark);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.menu-item-info {
+  min-width: 0;
+}
+
+.menu-item-name {
+  overflow: hidden;
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-item-points {
+  margin-top: 8px;
+  color: var(--brand);
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.menu-item-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: end;
+}
+
 .mobile-bottom-nav {
   display: none;
 }
@@ -317,9 +386,25 @@ textarea::placeholder {
     font-weight: 800;
   }
 
-  .mobile-bottom-nav a:first-child {
+  .mobile-bottom-nav a.is-active {
     color: #1c0b05;
     background: linear-gradient(135deg, var(--danger), var(--brand));
+  }
+
+  .menu-item-card {
+    grid-template-columns: 84px minmax(0, 1fr);
+  }
+
+  .menu-item-cover {
+    width: 84px;
+    height: 72px;
+  }
+
+  .menu-item-actions {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    justify-content: space-between;
+    padding-top: 4px;
   }
 
   .responsive-grid,
