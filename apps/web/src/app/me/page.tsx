@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LogoutButton } from "../_components/logout-button";
 import { MemberShell } from "../_components/member-shell";
 import { getWebViewerSummary } from "../../lib/auth";
 import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
@@ -145,25 +144,14 @@ export default async function MePage({
       ) : null}
 
       <section className="glass-panel" style={{ padding: 24, marginBottom: 20 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 18,
-            alignItems: "flex-start",
-            flexWrap: "wrap"
-          }}
-        >
-          <div>
-            <div className="brand-kicker">My Orbit</div>
-            <h2 className="section-title" style={{ marginTop: 10 }}>
-              当前状态
-            </h2>
-            <div style={{ marginTop: 8, color: "var(--text-muted)" }}>
-              {(profile?.display_name as string | undefined) || viewer.displayName || viewer.username || "家庭成员"}
-            </div>
+        <div>
+          <div className="brand-kicker">My Orbit</div>
+          <h2 className="section-title" style={{ marginTop: 10 }}>
+            当前状态
+          </h2>
+          <div style={{ marginTop: 8, color: "var(--text-muted)" }}>
+            {(profile?.display_name as string | undefined) || viewer.displayName || viewer.username || "家庭成员"}
           </div>
-          <LogoutButton />
         </div>
 
         <div
