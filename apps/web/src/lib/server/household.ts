@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createSupabaseServiceRoleClient } from "../supabase/service-role-client";
 import { createSupabaseServerClient } from "../supabase/server-client";
 
 export type WebMembership = {
@@ -8,10 +9,11 @@ export type WebMembership = {
 };
 
 export async function getWebSessionUser() {
-  const supabase = await createSupabaseServerClient();
+  const authSupabase = await createSupabaseServerClient();
   const {
     data: { user }
-  } = await supabase.auth.getUser();
+  } = await authSupabase.auth.getUser();
+  const supabase = createSupabaseServiceRoleClient();
 
   return { supabase, user };
 }
@@ -82,7 +84,7 @@ export async function insertWebAuditLog(input: {
   action: string;
   detail?: string | null;
 }) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   await supabase.from("audit_logs").insert({
     household_id: input.householdId,
     actor_user_id: input.actorUserId,

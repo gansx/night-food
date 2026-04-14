@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type MenuCategory = {
   id: string;
@@ -32,11 +32,19 @@ export function OrderComposer({
   };
 }) {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [activeCategoryId, setActiveCategoryId] = useState(categories[0]?.id ?? "");
   const [remark, setRemark] = useState("");
   const [message, setMessage] = useState("选择菜品后即可提交家庭订单。");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!categories.some((category) => category.id === activeCategoryId)) {
+      setActiveCategoryId(categories[0]?.id ?? "");
+    }
+  }, [activeCategoryId, categories]);
+
   const allItems = useMemo(() => categories.flatMap((category) => category.items), [categories]);
+  const activeCategory = categories.find((category) => category.id === activeCategoryId) ?? categories[0];
   const selectedItems = allItems.filter((item) => (quantities[item.id] ?? 0) > 0);
   const total = selectedItems.reduce(
     (sum, item) => sum + item.pricePoints * (quantities[item.id] ?? 0),
@@ -109,36 +117,39 @@ export function OrderComposer({
       <aside className="glass-panel" style={{ padding: 18 }}>
         <h2 className="section-title">菜单分类</h2>
         <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-          {categories.map((category, index) => (
-            <div
+          {categories.map((category) => (
+            <button
+              type="button"
               key={category.id}
+              onClick={() => setActiveCategoryId(category.id)}
               style={{
+                border: "1px solid var(--border-soft)",
                 padding: 14,
                 borderRadius: 16,
-                background: index === 0 ? "var(--panel-strong)" : "rgba(255,255,255,0.68)",
-                border: "1px solid var(--border-soft)",
-                fontWeight: 700
+                background: category.id === activeCategory?.id ? "var(--panel-strong)" : "rgba(255,255,255,0.68)",
+                color: "var(--text-main)",
+                cursor: "pointer",
+                fontWeight: 700,
+                textAlign: "left"
               }}
+              aria-pressed={category.id === activeCategory?.id}
             >
               {category.name}
-            </div>
+            </button>
           ))}
         </div>
       </aside>
 
       <div style={{ display: "grid", gap: 20 }}>
-        {categories.map((category) => (
-          <section key={category.id} className="glass-panel" style={{ padding: 20 }}>
-            <h2 className="section-title">{category.name}</h2>
+        {activeCategory ? (
+          <section className="glass-panel" style={{ padding: 20 }}>
+            <h2 className="section-title">{activeCategory.name}</h2>
             <div style={{ marginTop: 18, display: "grid", gap: 14 }}>
-              {category.items.length ? (
-                category.items.map((item) => {
+              {activeCategory.items.length ? (
+                activeCategory.items.map((item) => {
                   const quantity = quantities[item.id] ?? 0;
                   return (
-                    <article
-                      key={item.id}
-                      className="menu-item-card"
-                    >
+                    <article key={item.id} className="menu-item-card">
                       {item.imageUrl ? (
                         <img className="menu-item-cover" src={item.imageUrl} alt={item.name} />
                       ) : (
@@ -190,7 +201,7 @@ export function OrderComposer({
               )}
             </div>
           </section>
-        ))}
+        ) : null}
 
         <section className="glass-panel" style={{ padding: 20 }}>
           <h2 className="section-title">购物车摘要</h2>

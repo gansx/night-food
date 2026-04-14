@@ -3,6 +3,7 @@ import type { CreateOrderPayload } from "@night-food/types";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "../../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../../lib/supabase/service-role-client";
 
 const createOrderSchema = z.object({
   householdId: z.string().uuid("家庭标识无效"),
@@ -18,10 +19,10 @@ const createOrderSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const supabase = await createSupabaseServerClient();
+  const authSupabase = await createSupabaseServerClient();
   const {
     data: { user }
-  } = await supabase.auth.getUser();
+  } = await authSupabase.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: "请先登录后再下单。" }, { status: 401 });
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
   }
 
   const { householdId } = parsed.data;
+  const supabase = createSupabaseServiceRoleClient();
 
   const { data: membership } = await supabase
     .from("household_members")

@@ -29,6 +29,7 @@ export async function getWebViewerSummary(): Promise<WebViewerSummary | null> {
         .from("household_members")
         .select("role, household_id, status")
         .eq("user_id", user.id)
+        .eq("status", "active")
         .order("created_at", { ascending: true })
         .limit(1)
         .maybeSingle(),
