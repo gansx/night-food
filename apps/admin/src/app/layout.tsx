@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Night Food Admin",
+  title: "家宴中枢",
   description: "Owner console for family menus, tasks, points, and members."
 };
 
@@ -17,4 +17,3 @@ export default function RootLayout({
     </html>
   );
 }
-

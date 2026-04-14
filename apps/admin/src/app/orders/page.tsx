@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../_components/admin-shell";
 import { getAdminViewerSummary } from "../../lib/auth";
-import { createSupabaseServerClient } from "../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { UpdateOrderStatusButton } from "./_components/update-order-status-button";
 
 type OrderItemSummary = {
@@ -38,7 +38,7 @@ export default async function AdminOrdersPage() {
     );
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data: orders } = await supabase
     .from("orders")
     .select("id, order_number, status, total_points, created_at, remark")

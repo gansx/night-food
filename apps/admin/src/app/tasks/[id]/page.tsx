@@ -2,7 +2,7 @@ import { formatDateTime, getTaskStatusLabel } from "@night-food/lib";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminViewerSummary } from "../../../lib/auth";
-import { createSupabaseServerClient } from "../../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../../lib/supabase/service-role-client";
 import { AdminShell } from "../../_components/admin-shell";
 import { ApproveTaskButton } from "../_components/approve-task-button";
 import { UpdateTaskStatusForm } from "./_components/update-task-status-form";
@@ -26,7 +26,7 @@ export default async function AdminTaskDetailPage({
   }
 
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [{ data: task }, { data: logs }] = await Promise.all([
     supabase
       .from("tasks")

@@ -3,7 +3,7 @@ import type { OrderStatus } from "@night-food/types";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminViewerSummary } from "../../../lib/auth";
-import { createSupabaseServerClient } from "../../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../../lib/supabase/service-role-client";
 import { AdminShell } from "../../_components/admin-shell";
 
 export default async function AdminOrderDetailPage({
@@ -21,7 +21,7 @@ export default async function AdminOrderDetailPage({
   }
 
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [{ data: order }, { data: items }, { data: logs }] = await Promise.all([
     supabase
       .from("orders")

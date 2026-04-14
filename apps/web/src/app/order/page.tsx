@@ -2,7 +2,7 @@ import { formatOrderingWindow, isCurrentTimeWithinWindow } from "@night-food/lib
 import Link from "next/link";
 import { MemberShell } from "../_components/member-shell";
 import { getWebViewerSummary } from "../../lib/auth";
-import { createSupabaseServerClient } from "../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { OrderComposer } from "./_components/order-composer";
 
 export default async function OrderPage() {
@@ -33,7 +33,7 @@ export default async function OrderPage() {
     );
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [{ data: categories }, { data: items }, { data: settings }, { data: household }] =
     await Promise.all([
       supabase

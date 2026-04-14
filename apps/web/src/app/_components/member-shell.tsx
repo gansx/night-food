@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { webPrimaryNav } from "@night-food/types";
+import { LogoutButton } from "./logout-button";
 
 export function MemberShell({
   title,
@@ -13,69 +14,31 @@ export function MemberShell({
 }) {
   return (
     <main className="app-shell">
-      <header
-        className="glass-panel"
-        style={{
-          padding: 24,
-          display: "grid",
-          gap: 18,
-          marginBottom: 20
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 18,
-            flexWrap: "wrap"
-          }}
-        >
+      <header className="glass-panel shell-hero">
+        <div className="shell-head">
           <div>
-            <div style={{ color: "var(--brand-dark)", fontWeight: 700, fontSize: 14 }}>
-              家庭成员端
-            </div>
-            <h1 style={{ margin: "10px 0 0", fontSize: "clamp(1.8rem, 3vw, 2.6rem)" }}>
-              {title}
-            </h1>
-            <p className="section-copy" style={{ maxWidth: 720 }}>
+            <div className="brand-kicker">家宴星球 | Family Orbit</div>
+            <h1 className="hero-title" style={{ fontSize: "clamp(2.3rem, 6vw, 4.8rem)" }}>{title}</h1>
+            <p className="hero-subtitle">
               {description}
             </p>
           </div>
-          <div
-            style={{
-              padding: "14px 18px",
-              borderRadius: 20,
-              background: "rgba(255,255,255,0.72)",
-              border: "1px solid var(--border-soft)",
-              minWidth: 220
-            }}
-          >
+          <div className="identity-card">
             <div style={{ color: "var(--text-muted)", fontSize: 14 }}>当前入口</div>
-            <div style={{ marginTop: 6, fontWeight: 800, fontSize: 22 }}>家庭成员视角</div>
-            <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 14 }}>
-              点餐、任务、订单、积分
+            <div style={{ marginTop: 6, fontWeight: 900, fontSize: 22 }}>成员星舱</div>
+            <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 14 }}>点餐、任务、订单、积分</div>
+            <div style={{ marginTop: 14 }}>
+              <LogoutButton />
             </div>
           </div>
         </div>
 
-        <nav
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-            gap: 10
-          }}
-        >
+        <nav className="primary-nav">
           {webPrimaryNav.map((item) => (
             <Link
               key={item.href}
               href={item.href as Route}
-              style={{
-                padding: 14,
-                borderRadius: 18,
-                background: "rgba(255,255,255,0.64)",
-                border: "1px solid var(--border-soft)"
-              }}
+              className="nav-card"
             >
               <div style={{ fontWeight: 700 }}>{item.label}</div>
               <div style={{ color: "var(--text-muted)", fontSize: 13, marginTop: 6 }}>
@@ -86,6 +49,13 @@ export function MemberShell({
         </nav>
       </header>
       {children}
+      <nav className="mobile-bottom-nav">
+        {webPrimaryNav.map((item) => (
+          <Link key={item.href} href={item.href as Route}>
+            {item.label.replace("家庭", "")}
+          </Link>
+        ))}
+      </nav>
     </main>
   );
 }

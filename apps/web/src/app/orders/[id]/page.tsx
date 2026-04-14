@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberShell } from "../../_components/member-shell";
 import { getWebViewerSummary } from "../../../lib/auth";
-import { createSupabaseServerClient } from "../../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../../lib/supabase/service-role-client";
 
 export default async function OrderDetailPage({
   params
@@ -17,7 +17,7 @@ export default async function OrderDetailPage({
   }
 
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [{ data: order }, { data: items }, { data: logs }] = await Promise.all([
     supabase
       .from("orders")

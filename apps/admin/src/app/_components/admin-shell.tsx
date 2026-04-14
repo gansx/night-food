@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { adminPrimaryNav } from "@night-food/types";
+import { LogoutButton } from "./logout-button";
 
 export function AdminShell({
   title,
@@ -13,58 +14,30 @@ export function AdminShell({
 }) {
   return (
     <main className="admin-shell">
-      <header className="admin-panel" style={{ padding: 24, marginBottom: 20 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 18,
-            alignItems: "flex-start",
-            flexWrap: "wrap"
-          }}
-        >
+      <header className="admin-panel shell-hero">
+        <div className="shell-head">
           <div>
-            <div style={{ color: "var(--brand)", fontWeight: 700, fontSize: 14 }}>
-              家主管理台
-            </div>
-            <h1 style={{ margin: "10px 0 0", fontSize: "clamp(1.8rem, 3vw, 2.6rem)" }}>
-              {title}
-            </h1>
-            <p style={{ margin: "10px 0 0", color: "var(--muted)", lineHeight: 1.7, maxWidth: 720 }}>
+            <div className="brand-kicker">家宴中枢 | Owner Console</div>
+            <h1 className="hero-title" style={{ fontSize: "clamp(2.3rem, 6vw, 4.8rem)" }}>{title}</h1>
+            <p className="hero-subtitle">
               {description}
             </p>
           </div>
-          <div
-            style={{
-              padding: "14px 18px",
-              borderRadius: 20,
-              background: "rgba(255,255,255,0.78)",
-              border: "1px solid var(--border)"
-            }}
-          >
+          <div className="identity-card">
             <div style={{ color: "var(--muted)", fontSize: 14 }}>管理身份</div>
-            <div style={{ marginTop: 6, fontWeight: 800, fontSize: 22 }}>家主</div>
+            <div style={{ marginTop: 6, fontWeight: 900, fontSize: 22 }}>家主</div>
+            <div style={{ marginTop: 14 }}>
+              <LogoutButton />
+            </div>
           </div>
         </div>
 
-        <nav
-          style={{
-            marginTop: 18,
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-            gap: 10
-          }}
-        >
+        <nav className="primary-nav">
           {adminPrimaryNav.map((item) => (
             <Link
               key={item.href}
               href={item.href as Route}
-              style={{
-                padding: 14,
-                borderRadius: 18,
-                background: "rgba(255,255,255,0.72)",
-                border: "1px solid var(--border)"
-              }}
+              className="nav-card"
             >
               <div style={{ fontWeight: 700 }}>{item.label}</div>
               <div style={{ marginTop: 6, color: "var(--muted)", fontSize: 13 }}>
@@ -75,6 +48,13 @@ export function AdminShell({
         </nav>
       </header>
       {children}
+      <nav className="mobile-bottom-nav">
+        {adminPrimaryNav.map((item) => (
+          <Link key={item.href} href={item.href as Route}>
+            {item.label.replace("管理", "")}
+          </Link>
+        ))}
+      </nav>
     </main>
   );
 }

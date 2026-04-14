@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberShell } from "../_components/member-shell";
 import { getWebViewerSummary } from "../../lib/auth";
-import { createSupabaseServerClient } from "../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 
 export default async function OrdersPage() {
   const viewer = await getWebViewerSummary();
@@ -13,7 +13,7 @@ export default async function OrdersPage() {
     redirect("/login");
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data: orders } = await supabase
     .from("orders")
     .select("id, order_number, status, total_points, created_at")

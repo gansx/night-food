@@ -22,10 +22,8 @@ export default async function LoginPage() {
         }}
       >
         <div>
-          <div style={{ color: "var(--brand-dark)", fontWeight: 700, fontSize: 14 }}>家庭成员登录</div>
-          <h1 style={{ margin: "12px 0 0", fontSize: "clamp(2rem, 4vw, 3rem)" }}>
-            登录到你的家庭空间
-          </h1>
+          <div className="brand-kicker">家宴星球</div>
+          <h1 className="hero-title" style={{ fontSize: "clamp(2.6rem, 7vw, 4.8rem)" }}>回到家庭星舱</h1>
           <p className="section-copy" style={{ maxWidth: 560 }}>
             现在只需要账号和密码。登录后，如果你还没有加入家庭，可以输入家主给你的家庭邀请码。
           </p>

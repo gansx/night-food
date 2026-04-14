@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../_components/admin-shell";
 import { getAdminViewerSummary } from "../../lib/auth";
-import { createSupabaseServerClient } from "../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { ApproveTaskButton } from "./_components/approve-task-button";
 import { CreateTaskForm } from "./_components/create-task-form";
 
@@ -42,7 +42,7 @@ export default async function AdminTasksPage({
     ? ((status ?? "all") as (typeof statusOptions)[number])
     : "all";
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   let taskQuery = supabase
     .from("tasks")
     .select(

@@ -2,8 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMemberStatusLabel, getOrderStatusLabel, getTaskStatusLabel } from "@night-food/lib";
 import { adminPrimaryNav } from "@night-food/types";
+import { LogoutButton } from "./_components/logout-button";
 import { getAdminViewerSummary } from "../lib/auth";
-import { createSupabaseServerClient } from "../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../lib/supabase/service-role-client";
 
 export default async function AdminHomePage() {
   const viewer = await getAdminViewerSummary();
@@ -40,7 +41,7 @@ export default async function AdminHomePage() {
     );
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const householdId = viewer.householdId ?? null;
 
   const [{ data: settings }, { data: orders }, { data: tasks }, { data: members }, { data: pointRanks }] =
@@ -89,31 +90,24 @@ export default async function AdminHomePage() {
 
   return (
     <main className="admin-shell">
-      <section
-        className="admin-panel"
-        style={{
-          padding: 28,
-          display: "grid",
-          gap: 24,
-          background: "linear-gradient(145deg, rgba(255,250,241,0.98) 0%, rgba(245,253,246,0.92) 100%)"
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
+      <section className="admin-panel shell-hero">
+        <div className="shell-head">
           <div style={{ maxWidth: 640 }}>
-            <div style={{ color: "var(--brand)", fontWeight: 700 }}>家庭管理台</div>
-            <h1 style={{ margin: "14px 0 10px", fontSize: "clamp(2rem, 4vw, 3.4rem)" }}>
-              家主统一管理菜单、订单、任务、积分和家庭规则
-            </h1>
-            <p style={{ margin: 0, lineHeight: 1.7, color: "var(--muted)" }}>
-              这里是家庭运营后台，不是商家后台。你可以统一管理每日菜单、订单状态、任务奖励、成员权限和积分规则。
+            <div className="brand-kicker">Owner Web3 Console</div>
+            <h1 className="hero-title">家宴中枢</h1>
+            <p className="hero-subtitle">
+              给家主使用的家庭运营台。管理菜单、订单、任务、积分和成员权限，让家里的协作像一个漂亮的小型 DAO 一样清晰。
             </p>
           </div>
 
-          <div className="admin-panel" style={{ padding: 18, minWidth: 280, background: "rgba(255,255,255,0.76)" }}>
+          <div className="identity-card">
             <div style={{ color: "var(--muted)", fontSize: 14 }}>当前登录</div>
-            <div style={{ marginTop: 8, fontSize: 24, fontWeight: 800 }}>{viewer.roleLabel}</div>
+            <div style={{ marginTop: 8, fontSize: 24, fontWeight: 900 }}>{viewer.roleLabel}</div>
             <div style={{ marginTop: 10, color: "var(--muted)" }}>
               {viewer.displayName || viewer.username || "已登录"}
+            </div>
+            <div style={{ marginTop: 14 }}>
+              <LogoutButton />
             </div>
           </div>
         </div>
@@ -173,7 +167,7 @@ export default async function AdminHomePage() {
         ) : null}
       </section>
 
-      <section style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 20, marginTop: 20 }}>
+      <section className="responsive-grid" style={{ marginTop: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>
           <h2 style={{ margin: 0, fontSize: 20 }}>核心管理模块</h2>
           <p style={{ margin: "8px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>

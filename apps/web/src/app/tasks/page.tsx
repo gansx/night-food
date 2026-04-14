@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberShell } from "../_components/member-shell";
 import { getWebViewerSummary } from "../../lib/auth";
-import { createSupabaseServerClient } from "../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { ClaimTaskButton } from "./_components/claim-task-button";
 import { SubmitTaskButton } from "./_components/submit-task-button";
 
@@ -39,7 +39,7 @@ export default async function TasksPage({
     ? ((filter ?? "all") as (typeof filterOptions)[number])
     : "all";
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [{ data: tasks }, { data: settings }] = await Promise.all([
     supabase
       .from("tasks")

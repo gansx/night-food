@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberShell } from "../../_components/member-shell";
 import { getWebViewerSummary } from "../../../lib/auth";
-import { createSupabaseServerClient } from "../../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../../lib/supabase/service-role-client";
 import { SubmitTaskButton } from "../_components/submit-task-button";
 
 export default async function TaskDetailPage({
@@ -21,7 +21,7 @@ export default async function TaskDetailPage({
   }
 
   const { id } = await params;
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [{ data: task }, { data: logs }] = await Promise.all([
     supabase
       .from("tasks")

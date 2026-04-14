@@ -22,10 +22,8 @@ export default async function RegisterPage() {
         }}
       >
         <div>
-          <div style={{ color: "var(--brand-dark)", fontWeight: 700, fontSize: 14 }}>家庭账号注册</div>
-          <h1 style={{ margin: "12px 0 0", fontSize: "clamp(2rem, 4vw, 3rem)" }}>
-            创建一个家里人都能理解的账号
-          </h1>
+          <div className="brand-kicker">家宴星球</div>
+          <h1 className="hero-title" style={{ fontSize: "clamp(2.6rem, 7vw, 4.8rem)" }}>创建家庭身份</h1>
           <p className="section-copy" style={{ maxWidth: 560 }}>
             不再使用邮箱登录。每个人用自己的账号密码进入，之后通过家庭邀请码加入同一个家庭。
           </p>

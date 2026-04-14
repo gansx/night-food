@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminViewerSummary } from "../../lib/auth";
-import { createSupabaseServerClient } from "../../lib/supabase/server-client";
+import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { AdminShell } from "../_components/admin-shell";
 import { PointsAdjustForm } from "./_components/points-adjust-form";
 
@@ -38,7 +38,7 @@ export default async function PointsPage({
   const from = (currentPage - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const [{ data: members }, { data: transactions, count }] = await Promise.all([
     supabase
       .from("household_members")

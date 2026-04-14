@@ -22,10 +22,8 @@ export default async function AdminRegisterPage() {
         }}
       >
         <div>
-          <div style={{ color: "var(--brand)", fontWeight: 700, fontSize: 14 }}>家主账号注册</div>
-          <h1 style={{ margin: "12px 0 0", fontSize: "clamp(2rem, 4vw, 3rem)" }}>
-            先创建家主账号
-          </h1>
+          <div className="brand-kicker">家宴中枢</div>
+          <h1 className="hero-title" style={{ fontSize: "clamp(2.6rem, 7vw, 4.8rem)" }}>创建家主密钥</h1>
           <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.7 }}>
             注册后创建家庭，系统会生成家庭邀请码。家人注册自己的账号后输入邀请码即可加入。
           </p>
