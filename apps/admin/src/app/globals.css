@@ -1,14 +1,15 @@
 :root {
   color-scheme: dark;
-  --bg: #050707;
-  --panel: rgba(10, 14, 16, 0.82);
+  --bg: #020507;
+  --panel: rgba(5, 11, 16, 0.82);
   --panel-alt: rgba(255, 255, 255, 0.055);
-  --border: rgba(113, 255, 192, 0.16);
-  --text: #f3fff8;
-  --muted: #9eb3a8;
-  --brand: #31f29a;
-  --warn: #ffb35b;
-  --accent: #59d7ff;
+  --border: rgba(231, 201, 174, 0.16);
+  --text: #f5e8dc;
+  --muted: #a99483;
+  --brand: #ef9f5d;
+  --warn: #e87748;
+  --accent: #22748d;
+  --stone: #295a44;
   --shadow: 0 26px 80px rgba(0, 0, 0, 0.46);
 }
 
@@ -26,9 +27,10 @@ body {
   margin: 0;
   color: var(--text);
   background:
-    radial-gradient(circle at 8% 0%, rgba(49, 242, 154, 0.18), transparent 28rem),
-    radial-gradient(circle at 92% 8%, rgba(89, 215, 255, 0.16), transparent 30rem),
-    linear-gradient(145deg, #050707 0%, #08120f 48%, #0d1117 100%);
+    radial-gradient(circle at 8% 0%, rgba(232, 119, 72, 0.2), transparent 28rem),
+    radial-gradient(circle at 92% 8%, rgba(34, 116, 141, 0.22), transparent 30rem),
+    radial-gradient(circle at 54% 96%, rgba(41, 90, 68, 0.24), transparent 34rem),
+    linear-gradient(145deg, #020507 0%, #07111a 46%, #03100d 100%);
 }
 
 body::before {
@@ -38,10 +40,23 @@ body::before {
   pointer-events: none;
   content: "";
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(231, 201, 174, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(231, 201, 174, 0.03) 1px, transparent 1px);
   background-size: 52px 52px;
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 86%);
+}
+
+body::after {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(115deg, transparent 0 34%, rgba(231, 201, 174, 0.05) 35%, transparent 46%),
+    radial-gradient(circle at 22% 20%, rgba(255, 255, 255, 0.055), transparent 18rem);
+  mix-blend-mode: screen;
+  opacity: 0.52;
 }
 
 a {
@@ -65,7 +80,7 @@ select,
 textarea {
   color: var(--text) !important;
   background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(113, 255, 192, 0.16) !important;
+  border-color: rgba(231, 201, 174, 0.16) !important;
 }
 
 input::placeholder,
@@ -94,8 +109,10 @@ textarea::placeholder {
   inset: 0;
   pointer-events: none;
   content: "";
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 38%);
-  opacity: 0.52;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(239, 159, 93, 0.16), transparent 18rem),
+    linear-gradient(135deg, rgba(231, 201, 174, 0.12), transparent 38%);
+  opacity: 0.6;
 }
 
 .admin-panel > * {
@@ -108,9 +125,9 @@ textarea::placeholder {
   width: fit-content;
   border-radius: 999px;
   padding: 8px 12px;
-  color: #baffdc;
-  background: rgba(49, 242, 154, 0.1);
-  border: 1px solid rgba(49, 242, 154, 0.24);
+  color: #e7c9ae;
+  background: rgba(239, 159, 93, 0.1);
+  border: 1px solid rgba(239, 159, 93, 0.26);
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -152,8 +169,10 @@ textarea::placeholder {
   min-width: min(100%, 260px);
   padding: 16px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background:
+    linear-gradient(155deg, rgba(8, 40, 81, 0.34), rgba(41, 90, 68, 0.16)),
+    rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(231, 201, 174, 0.13) !important;
 }
 
 .primary-nav {
@@ -165,15 +184,19 @@ textarea::placeholder {
 .nav-card {
   padding: 14px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.055) !important;
-  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  background:
+    linear-gradient(150deg, rgba(8, 40, 81, 0.2), rgba(2, 5, 7, 0.1)),
+    rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid rgba(231, 201, 174, 0.1) !important;
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
 .nav-card:hover {
   transform: translateY(-2px);
-  background: rgba(49, 242, 154, 0.1) !important;
-  border-color: rgba(49, 242, 154, 0.32) !important;
+  background:
+    linear-gradient(150deg, rgba(232, 119, 72, 0.16), rgba(34, 116, 141, 0.16)),
+    rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(239, 159, 93, 0.34) !important;
 }
 
 .mobile-bottom-nav {
@@ -193,13 +216,13 @@ textarea::placeholder {
 
 .ghost-button {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(231, 201, 174, 0.06);
+  border: 1px solid rgba(231, 201, 174, 0.14);
 }
 
 .primary-button {
-  color: #02100a;
-  background: linear-gradient(135deg, var(--brand), var(--accent));
+  color: #1c0b05;
+  background: linear-gradient(135deg, var(--warn), var(--brand));
   border: 0;
 }
 
@@ -253,9 +276,9 @@ textarea::placeholder {
     grid-template-columns: repeat(6, 1fr);
     gap: 6px;
     padding: 8px;
-    border: 1px solid rgba(113, 255, 192, 0.18);
+    border: 1px solid rgba(231, 201, 174, 0.18);
     border-radius: 26px;
-    background: rgba(5, 7, 7, 0.86);
+    background: rgba(2, 5, 7, 0.86);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.46);
     backdrop-filter: blur(20px);
   }
@@ -271,8 +294,8 @@ textarea::placeholder {
   }
 
   .mobile-bottom-nav a:first-child {
-    color: #03130c;
-    background: linear-gradient(135deg, var(--brand), var(--accent));
+    color: #1c0b05;
+    background: linear-gradient(135deg, var(--warn), var(--brand));
   }
 
   .responsive-grid,
