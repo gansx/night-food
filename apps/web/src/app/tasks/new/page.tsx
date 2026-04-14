@@ -13,7 +13,7 @@ export default async function NewTaskPage() {
 
   if (!viewer.householdId || viewer.role !== "owner") {
     return (
-      <MemberShell title="发布任务" description="只有家主可以发布家庭任务。">
+      <MemberShell title="发布任务" description="只有家主可以发布家庭任务。" activeHref="/tasks">
         <section className="glass-panel" style={{ padding: 24, color: "var(--text-muted)" }}>
           当前账号不是家主，或者还没有加入家庭。
           <div style={{ marginTop: 14 }}>
@@ -30,6 +30,7 @@ export default async function NewTaskPage() {
     <MemberShell
       title="发布任务"
       description="家主可以在成员端快速补充新的家庭任务和积分奖励。"
+      activeHref="/tasks"
     >
       <CreateTaskCard householdId={viewer.householdId} />
     </MemberShell>

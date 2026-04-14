@@ -101,7 +101,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <MemberNav />
+        <MemberNav activeHref="/" />
       </section>
 
       {viewer && !viewer.householdId ? (
@@ -218,7 +218,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      <MemberNav variant="mobile" />
+      <MemberNav activeHref="/" variant="mobile" />
     </main>
   );
 }

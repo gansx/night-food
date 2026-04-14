@@ -39,7 +39,7 @@ export default async function TaskDetailPage({
 
   if (!task) {
     return (
-      <MemberShell title="任务详情" description="没有找到这个任务。">
+      <MemberShell title="任务详情" description="没有找到这个任务。" activeHref="/tasks">
         <section className="glass-panel" style={{ padding: 24 }}>
           <Link href="/tasks" style={{ color: "var(--brand)", fontWeight: 700 }}>
             返回任务列表
@@ -52,7 +52,7 @@ export default async function TaskDetailPage({
   const isMine = task.assigned_user_id === viewer.userId;
 
   return (
-    <MemberShell title="任务详情" description="查看任务截止时间、日志和当前奖励。">
+    <MemberShell title="任务详情" description="查看任务截止时间、日志和当前奖励。" activeHref="/tasks">
       <section style={{ display: "grid", gridTemplateColumns: "1fr 0.95fr", gap: 20 }}>
         <div className="glass-panel" style={{ padding: 24 }}>
           <Link href="/tasks" style={{ color: "var(--brand)", fontWeight: 700 }}>

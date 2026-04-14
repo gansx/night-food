@@ -23,7 +23,7 @@ export default async function TasksPage({
 
   if (!viewer.householdId) {
     return (
-      <MemberShell title="家庭任务中心" description="你还没有加入家庭，暂时无法参与任务。">
+      <MemberShell title="家庭任务中心" description="你还没有加入家庭，暂时无法参与任务。" activeHref="/tasks">
         <section className="glass-panel" style={{ padding: 24, color: "var(--text-muted)" }}>
           请先输入家庭邀请码加入家庭。{" "}
           <Link href="/family" style={{ color: "var(--brand)", fontWeight: 700 }}>
@@ -70,6 +70,7 @@ export default async function TasksPage({
     <MemberShell
       title="家庭任务中心"
       description="领取任务、提交完成、查看截止时间和积分到账状态。"
+      activeHref="/tasks"
     >
       <section style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 20 }}>
         <div className="glass-panel" style={{ padding: 24 }}>

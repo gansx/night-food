@@ -4,10 +4,12 @@ import { MemberNav } from "./member-nav";
 export function MemberShell({
   title,
   description,
+  activeHref = "/",
   children
 }: {
   title: string;
   description: string;
+  activeHref?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -31,10 +33,10 @@ export function MemberShell({
           </div>
         </div>
 
-        <MemberNav />
+        <MemberNav activeHref={activeHref} />
       </header>
       {children}
-      <MemberNav variant="mobile" />
+      <MemberNav activeHref={activeHref} variant="mobile" />
     </main>
   );
 }

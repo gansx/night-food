@@ -1,26 +1,28 @@
-"use client";
-
 import type { Route } from "next";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { webPrimaryNav } from "@night-food/types";
 
-function isActivePath(pathname: string, href: string) {
+function isActivePath(activeHref: string, href: string) {
   if (href === "/") {
-    return pathname === "/";
+    return activeHref === "/";
   }
 
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return activeHref === href || activeHref.startsWith(`${href}/`);
 }
 
-export function MemberNav({ variant = "desktop" }: { variant?: "desktop" | "mobile" }) {
-  const pathname = usePathname();
+export function MemberNav({
+  activeHref = "/",
+  variant = "desktop"
+}: {
+  activeHref?: string;
+  variant?: "desktop" | "mobile";
+}) {
   const isMobile = variant === "mobile";
 
   return (
     <nav className={isMobile ? "mobile-bottom-nav" : "primary-nav"}>
       {webPrimaryNav.map((item) => {
-        const active = isActivePath(pathname, item.href);
+        const active = isActivePath(activeHref, item.href);
         return (
           <Link
             key={item.href}

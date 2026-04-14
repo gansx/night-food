@@ -89,6 +89,7 @@ export default async function MePage({
     <MemberShell
       title="我的"
       description="查看个人资料、家庭身份、积分余额和完整积分流水。"
+      activeHref="/me"
     >
       {!viewer.householdId ? (
         <section

@@ -10,7 +10,7 @@ export default async function OrderPage() {
 
   if (!viewer) {
     return (
-      <MemberShell title="家庭点单" description="请先登录后再进行点餐。">
+      <MemberShell title="家庭点单" description="请先登录后再进行点餐。" activeHref="/order">
         <section className="glass-panel" style={{ padding: 24 }}>
           <Link href="/login" style={{ color: "var(--brand)", fontWeight: 700 }}>
             前往登录
@@ -22,7 +22,7 @@ export default async function OrderPage() {
 
   if (!viewer.householdId) {
     return (
-      <MemberShell title="家庭点单" description="你还没有加入家庭，暂时无法点餐。">
+      <MemberShell title="家庭点单" description="你还没有加入家庭，暂时无法点餐。" activeHref="/order">
         <section className="glass-panel" style={{ padding: 24, color: "var(--text-muted)" }}>
           请先输入家庭邀请码加入家庭，再回来点餐。{" "}
           <Link href="/family" style={{ color: "var(--brand)", fontWeight: 700 }}>
@@ -94,6 +94,7 @@ export default async function OrderPage() {
     <MemberShell
       title="家庭点单"
       description="这一页保留旧版小程序最核心的点单体验：分类浏览、菜品选择、购物车和积分结算。"
+      activeHref="/order"
     >
       {mergedCategories.length ? (
         <OrderComposer

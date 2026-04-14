@@ -24,6 +24,7 @@ export default async function OrdersPage() {
     <MemberShell
       title="我的订单"
       description="查看自己的点餐记录、订单状态和积分消耗。"
+      activeHref="/orders"
     >
       <section className="glass-panel" style={{ padding: 24 }}>
         <h2 className="section-title">最近订单</h2>

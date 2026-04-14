@@ -39,7 +39,7 @@ export default async function OrderDetailPage({
 
   if (!order) {
     return (
-      <MemberShell title="订单详情" description="没有找到这个订单。">
+      <MemberShell title="订单详情" description="没有找到这个订单。" activeHref="/orders">
         <section className="glass-panel" style={{ padding: 24 }}>
           <Link href="/orders" style={{ color: "var(--brand)", fontWeight: 700 }}>
             返回订单列表
@@ -50,7 +50,7 @@ export default async function OrderDetailPage({
   }
 
   return (
-    <MemberShell title="订单详情" description="查看订单明细、状态变化和家主备注。">
+    <MemberShell title="订单详情" description="查看订单明细、状态变化和家主备注。" activeHref="/orders">
       <section style={{ display: "grid", gridTemplateColumns: "1fr 0.95fr", gap: 20 }}>
         <div className="glass-panel" style={{ padding: 24 }}>
           <Link href="/orders" style={{ color: "var(--brand)", fontWeight: 700 }}>
