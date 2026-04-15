@@ -42,7 +42,9 @@ async function createMenuItem(page: Page, input: { categoryName: string; itemNam
   await page.goto(url(adminBaseUrl!, "/menu"));
   await page.getByTestId("create-category-name").fill(input.categoryName);
   await page.getByTestId("create-category-submit").click();
-  await expect(page.getByText(input.categoryName).first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("create-menu-item-category").locator("option", { hasText: input.categoryName })).toHaveCount(1, {
+    timeout: 30_000
+  });
 
   await page.getByTestId("create-menu-item-name").fill(input.itemName);
   await page.getByTestId("create-menu-item-description").fill("E2E 家庭点餐回归菜品");
@@ -78,13 +80,24 @@ async function submitAndCancelOrder(page: Page, itemName: string) {
   const itemCard = page.getByTestId("menu-item-card").filter({ hasText: itemName });
   await expect(itemCard).toBeVisible({ timeout: 30_000 });
   await itemCard.getByTestId("add-menu-item").click();
-  await page.getByTestId("order-submit").click();
-  await expect(page.getByTestId("order-message")).toContainText(/订单|璁㈠崟/, { timeout: 30_000 });
+  const orderResponsePromise = page.waitForResponse(
+    (response) => response.url() === url(webBaseUrl!, "/api/orders") && response.request().method() === "POST"
+  );
+  await Promise.all([orderResponsePromise, page.getByTestId("order-submit").click()]);
+  const orderResponse = await orderResponsePromise;
+  expect(orderResponse.ok()).toBeTruthy();
+  await expect(page.getByTestId("order-message")).toContainText(/成功|鎴愬姛/, { timeout: 30_000 });
 
   page.once("dialog", (dialog) => dialog.accept());
   await page.goto(url(webBaseUrl!, "/orders"));
-  await page.getByTestId("cancel-order-button").first().click();
-  await expect(page.getByText(/已取消|宸插彇娑|订单已取消/).first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("cancel-order-button").first()).toBeVisible({ timeout: 30_000 });
+  const cancelResponsePromise = page.waitForResponse(
+    (response) => response.url().includes("/api/orders/") && response.url().endsWith("/cancel")
+  );
+  await Promise.all([cancelResponsePromise, page.getByTestId("cancel-order-button").first().click()]);
+  const cancelResponse = await cancelResponsePromise;
+  expect(cancelResponse.ok()).toBeTruthy();
+  await expect(page.getByTestId("cancel-order-button")).toHaveCount(0, { timeout: 30_000 });
 }
 
 async function createAssignedTask(adminPage: Page, input: { taskTitle: string; memberDisplayName: string }) {
@@ -118,6 +131,8 @@ test.describe("household core flow", () => {
   test.skip(!hasLiveTargets, "Set PLAYWRIGHT_BASE_URL and PLAYWRIGHT_ADMIN_BASE_URL to run the full browser regression.");
 
   test("owner and member can complete menu, order, cancellation and task workflows", async ({ browser }) => {
+    test.setTimeout(300_000);
+
     const suffix = Date.now().toString(36);
     const password = "test123456";
     const ownerUsername = `owner_${suffix}`.slice(0, 24);

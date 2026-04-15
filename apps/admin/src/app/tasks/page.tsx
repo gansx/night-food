@@ -66,12 +66,12 @@ export default async function AdminTasksPage({
 
   const memberUserIds = (householdMembers ?? []).map((member) => member.user_id as string);
   const { data: profiles } = memberUserIds.length
-    ? await supabase.from("profiles").select("id, display_name, username").in("id", memberUserIds)
+    ? await supabase.from("profiles").select("user_id, display_name, username").in("user_id", memberUserIds)
     : { data: [] as Array<Record<string, unknown>> };
 
   const profileMap = new Map(
     (profiles ?? []).map((profile) => [
-      profile.id as string,
+      profile.user_id as string,
       {
         displayName: profile.display_name as string | null,
         username: profile.username as string | null
