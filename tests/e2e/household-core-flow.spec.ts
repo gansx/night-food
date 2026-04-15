@@ -42,9 +42,10 @@ async function createMenuItem(page: Page, input: { categoryName: string; itemNam
   await page.goto(url(adminBaseUrl!, "/menu"));
   await page.getByTestId("create-category-name").fill(input.categoryName);
   await page.getByTestId("create-category-submit").click();
-  await expect(page.getByTestId("create-menu-item-category").locator("option", { hasText: input.categoryName })).toHaveCount(1, {
-    timeout: 30_000
-  });
+  await expect(page.getByTestId("create-menu-item-category")).toBeEnabled({ timeout: 30_000 });
+  await page.getByTestId("create-menu-item-category").click();
+  await expect(page.getByRole("option", { name: input.categoryName })).toBeVisible({ timeout: 30_000 });
+  await page.getByRole("option", { name: input.categoryName }).click();
 
   await page.getByTestId("create-menu-item-name").fill(input.itemName);
   await page.getByTestId("create-menu-item-description").fill("E2E 家庭点餐回归菜品");
