@@ -179,10 +179,6 @@ input[type="checkbox"]:focus-visible {
   min-width: 0;
 }
 
-.orbit-select[data-open="true"] {
-  z-index: 140;
-}
-
 .orbit-select-trigger {
   position: relative;
   display: flex;
@@ -257,13 +253,9 @@ input[type="checkbox"]:focus-visible {
 }
 
 .orbit-select-popover {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  left: 0;
-  z-index: 160;
+  position: fixed;
+  z-index: 1000;
   display: grid;
-  max-height: 260px;
   gap: 6px;
   overflow: auto;
   border: 1px solid rgba(239, 159, 93, 0.3);
@@ -425,11 +417,6 @@ textarea::placeholder {
   backdrop-filter: blur(22px);
 }
 
-.glass-panel:has(.orbit-select[data-open="true"]) {
-  z-index: 120;
-  overflow: visible;
-}
-
 .glass-panel::before {
   position: absolute;
   inset: 0;
@@ -444,12 +431,6 @@ textarea::placeholder {
 .glass-panel > * {
   position: relative;
   z-index: 1;
-}
-
-.glass-panel > *:has(.orbit-select[data-open="true"]),
-.glass-panel form:has(.orbit-select[data-open="true"]) {
-  z-index: 150;
-  overflow: visible;
 }
 
 .section-title {

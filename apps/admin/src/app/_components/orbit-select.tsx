@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 
 type OrbitSelectOption = {
   value: string;
   label: string;
+};
+
+type PopoverPosition = {
+  top: number;
+  left: number;
+  width: number;
+  maxHeight: number;
 };
 
 export function OrbitSelect({
@@ -24,12 +32,37 @@ export function OrbitSelect({
 }) {
   const id = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState<PopoverPosition | null>(null);
   const selected = options.find((option) => option.value === value);
+
+  function updatePosition() {
+    const rect = rootRef.current?.getBoundingClientRect();
+    if (!rect) {
+      return;
+    }
+
+    const margin = 12;
+    const width = Math.max(rect.width, 180);
+    const maxLeft = Math.max(margin, window.innerWidth - width - margin);
+    const topSpace = window.innerHeight - rect.bottom - margin;
+    const bottomSpace = rect.top - margin;
+    const openUp = topSpace < 180 && bottomSpace > topSpace;
+    const maxHeight = Math.max(160, Math.min(320, openUp ? bottomSpace - 8 : topSpace - 8));
+
+    setPosition({
+      top: openUp ? Math.max(margin, rect.top - maxHeight - 8) : rect.bottom + 8,
+      left: Math.min(Math.max(margin, rect.left), maxLeft),
+      width,
+      maxHeight
+    });
+  }
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (!rootRef.current?.contains(target) && !popoverRef.current?.contains(target)) {
         setOpen(false);
       }
     }
@@ -37,6 +70,30 @@ export function OrbitSelect({
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, []);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setPosition(null);
+      return;
+    }
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open]);
+
+  const popoverStyle: CSSProperties | undefined = position
+    ? {
+        top: position.top,
+        left: position.left,
+        width: position.width,
+        maxHeight: position.maxHeight
+      }
+    : undefined;
 
   return (
     <div ref={rootRef} className="orbit-select" data-open={open ? "true" : "false"}>
@@ -58,8 +115,15 @@ export function OrbitSelect({
         </span>
       </button>
 
-      {open ? (
-        <div id={`${id}-listbox`} className="orbit-select-popover" role="listbox">
+      {open && position
+        ? createPortal(
+            <div
+              ref={popoverRef}
+              id={`${id}-listbox`}
+              className="orbit-select-popover"
+              role="listbox"
+              style={popoverStyle}
+            >
           {options.map((option) => {
             const active = option.value === value;
             return (
@@ -80,8 +144,10 @@ export function OrbitSelect({
               </button>
             );
           })}
-        </div>
-      ) : null}
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 }
