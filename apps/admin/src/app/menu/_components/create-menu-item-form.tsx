@@ -78,12 +78,13 @@ export function CreateMenuItemForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="admin-panel" style={{ padding: 20 }}>
+    <form onSubmit={handleSubmit} className="admin-panel" data-testid="create-menu-item-form" style={{ padding: 20 }}>
       <h3 style={{ margin: 0, fontSize: 18 }}>新建菜品</h3>
       <div style={{ marginTop: 14, display: "grid", gap: 12 }}>
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>分类</span>
           <select
+            data-testid="create-menu-item-category"
             value={form.categoryId}
             onChange={(event) => setForm((current) => ({ ...current, categoryId: event.target.value }))}
             style={inputStyle}
@@ -98,6 +99,7 @@ export function CreateMenuItemForm({
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>菜品名称</span>
           <input
+            data-testid="create-menu-item-name"
             value={form.name}
             onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
             placeholder="例如：照烧鸡腿饭"
@@ -107,6 +109,7 @@ export function CreateMenuItemForm({
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>描述</span>
           <textarea
+            data-testid="create-menu-item-description"
             value={form.description}
             onChange={(event) =>
               setForm((current) => ({ ...current, description: event.target.value }))
@@ -119,6 +122,7 @@ export function CreateMenuItemForm({
           <label style={{ display: "grid", gap: 8 }}>
             <span style={{ color: "var(--muted)", fontSize: 14 }}>积分价格</span>
             <input
+              data-testid="create-menu-item-price"
               type="number"
               min={0}
               value={form.pricePoints}
@@ -134,6 +138,7 @@ export function CreateMenuItemForm({
           <label style={{ display: "grid", gap: 8 }}>
             <span style={{ color: "var(--muted)", fontSize: 14 }}>排序</span>
             <input
+              data-testid="create-menu-item-sort"
               type="number"
               min={0}
               value={form.sortOrder}
@@ -180,9 +185,10 @@ export function CreateMenuItemForm({
 
       <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>{message}</p>
 
-      <button
-        type="submit"
-        disabled={loading || !categories.length}
+        <button
+          type="submit"
+          data-testid="create-menu-item-submit"
+          disabled={loading || !categories.length}
         style={{
           ...buttonStyle,
           background: !categories.length ? "#c6c1b8" : "var(--brand)"

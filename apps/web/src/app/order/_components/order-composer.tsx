@@ -116,7 +116,7 @@ export function OrderComposer({
     >
       <aside className="glass-panel" style={{ padding: 18 }}>
         <h2 className="section-title">菜单分类</h2>
-        <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
+        <div data-testid="order-category-tabs" style={{ marginTop: 16, display: "grid", gap: 10 }}>
           {categories.map((category) => (
             <button
               type="button"
@@ -149,7 +149,7 @@ export function OrderComposer({
                 activeCategory.items.map((item) => {
                   const quantity = quantities[item.id] ?? 0;
                   return (
-                    <article key={item.id} className="menu-item-card">
+                    <article key={item.id} className="menu-item-card" data-testid="menu-item-card">
                       {item.imageUrl ? (
                         <img className="menu-item-cover" src={item.imageUrl} alt={item.name} />
                       ) : (
@@ -162,6 +162,7 @@ export function OrderComposer({
                       <div className="menu-item-actions">
                         <button
                           type="button"
+                          data-testid="decrease-menu-item"
                           onClick={() =>
                             setQuantities((current) => ({
                               ...current,
@@ -176,6 +177,7 @@ export function OrderComposer({
                         <span style={{ minWidth: 24, textAlign: "center" }}>{quantity}</span>
                         <button
                           type="button"
+                          data-testid="add-menu-item"
                           disabled={!item.isAvailable}
                           onClick={() =>
                             setQuantities((current) => ({
@@ -267,7 +269,7 @@ export function OrderComposer({
             />
           </label>
 
-          <p className="section-copy">{message}</p>
+          <p className="section-copy" data-testid="order-message">{message}</p>
 
           <div
             style={{
@@ -285,6 +287,7 @@ export function OrderComposer({
             </div>
             <button
               type="button"
+              data-testid="order-submit"
               disabled={submitDisabled}
               onClick={submitOrder}
               style={{

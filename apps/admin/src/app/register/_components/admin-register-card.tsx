@@ -70,11 +70,12 @@ export function AdminRegisterCard() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="admin-panel" style={{ padding: 20 }}>
+    <form onSubmit={handleSubmit} className="admin-panel" data-testid="admin-register-form" style={{ padding: 20 }}>
       <div style={{ display: "grid", gap: 14 }}>
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>账号</span>
           <input
+            data-testid="admin-register-username"
             value={form.username}
             onChange={(event) => setForm((current) => ({ ...current, username: normalizeUsername(event.target.value) }))}
             placeholder="3-24 位，小写字母/数字/下划线"
@@ -85,6 +86,7 @@ export function AdminRegisterCard() {
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>昵称</span>
           <input
+            data-testid="admin-register-display-name"
             value={form.displayName}
             onChange={(event) => setForm((current) => ({ ...current, displayName: event.target.value }))}
             placeholder="例如 爸爸"
@@ -95,6 +97,7 @@ export function AdminRegisterCard() {
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>密码</span>
           <input
+            data-testid="admin-register-password"
             value={form.password}
             onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
             placeholder="至少 6 位"
@@ -106,7 +109,7 @@ export function AdminRegisterCard() {
       </div>
 
       <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>{message}</p>
-      <button type="submit" disabled={loading} style={buttonStyle}>
+      <button type="submit" data-testid="admin-register-submit" disabled={loading} style={buttonStyle}>
         {loading ? "注册中..." : "注册家主账号"}
       </button>
       <div style={{ marginTop: 14, color: "var(--muted)", fontSize: 14 }}>

@@ -40,6 +40,7 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
     <div style={{ display: "grid", gap: 8 }}>
       <button
         type="button"
+        data-testid="cancel-order-button"
         onClick={handleCancel}
         disabled={loading}
         style={{

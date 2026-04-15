@@ -145,7 +145,7 @@ export default async function MembersPage() {
             }}
           >
             <div style={{ color: "var(--muted)", fontSize: 14 }}>把这个码发给家人</div>
-            <div style={{ marginTop: 8, fontSize: 34, fontWeight: 900, letterSpacing: "0.14em" }}>
+            <div data-testid="family-code" style={{ marginTop: 8, fontSize: 34, fontWeight: 900, letterSpacing: "0.14em" }}>
               {(household?.family_code as string | null) ?? "未生成"}
             </div>
             <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.7 }}>

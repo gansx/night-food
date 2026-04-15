@@ -43,11 +43,12 @@ export function CreateCategoryForm({ householdId }: { householdId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="admin-panel" style={{ padding: 20 }}>
+    <form onSubmit={handleSubmit} className="admin-panel" data-testid="create-category-form" style={{ padding: 20 }}>
       <h3 style={{ margin: 0, fontSize: 18 }}>新建分类</h3>
       <label style={{ display: "grid", gap: 8, marginTop: 14 }}>
         <span style={{ color: "var(--muted)", fontSize: 14 }}>分类名称</span>
         <input
+          data-testid="create-category-name"
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="例如：晚饭主食"
@@ -57,7 +58,7 @@ export function CreateCategoryForm({ householdId }: { householdId: string }) {
 
       <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>{message}</p>
 
-      <button type="submit" disabled={loading} style={buttonStyle}>
+      <button type="submit" data-testid="create-category-submit" disabled={loading} style={buttonStyle}>
         {loading ? "创建中..." : "创建分类"}
       </button>
     </form>

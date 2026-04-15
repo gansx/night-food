@@ -39,11 +39,12 @@ export function JoinHouseholdForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="glass-panel" style={{ padding: 20 }}>
+    <form onSubmit={handleSubmit} className="glass-panel" data-testid="join-household-form" style={{ padding: 20 }}>
       <h2 className="section-title">输入家庭邀请码</h2>
       <label style={{ display: "grid", gap: 8, marginTop: 16 }}>
         <span style={{ color: "var(--text-muted)", fontSize: 14 }}>家庭邀请码</span>
         <input
+          data-testid="join-family-code"
           value={form.familyCode}
           onChange={(event) => setForm({ familyCode: normalizeFamilyCode(event.target.value) })}
           placeholder="例如 8H2K9PQA"
@@ -51,7 +52,7 @@ export function JoinHouseholdForm() {
         />
       </label>
       <p className="section-copy">{message}</p>
-      <button type="submit" disabled={loading} style={buttonStyle}>
+      <button type="submit" data-testid="join-household-submit" disabled={loading} style={buttonStyle}>
         {loading ? "加入中..." : "加入家庭"}
       </button>
     </form>

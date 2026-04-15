@@ -68,12 +68,13 @@ export function CreateTaskForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="admin-panel" style={{ padding: 20 }}>
+    <form onSubmit={handleSubmit} className="admin-panel" data-testid="create-task-form" style={{ padding: 20 }}>
       <h3 style={{ margin: 0, fontSize: 18 }}>发布任务</h3>
       <div style={{ marginTop: 14, display: "grid", gap: 12 }}>
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>任务标题</span>
           <input
+            data-testid="create-task-title"
             value={form.title}
             onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
             placeholder="例如：饭后洗碗"
@@ -83,6 +84,7 @@ export function CreateTaskForm({
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>任务说明</span>
           <textarea
+            data-testid="create-task-description"
             value={form.description}
             onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
             placeholder="补充完成标准、时间要求等"
@@ -92,6 +94,7 @@ export function CreateTaskForm({
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>指派成员</span>
           <select
+            data-testid="create-task-assignee"
             value={form.assignedUserId}
             onChange={(event) => setForm((current) => ({ ...current, assignedUserId: event.target.value }))}
             style={inputStyle}
@@ -107,6 +110,7 @@ export function CreateTaskForm({
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>奖励积分</span>
           <input
+            data-testid="create-task-reward"
             type="number"
             min={1}
             value={form.rewardPoints}
@@ -122,6 +126,7 @@ export function CreateTaskForm({
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>截止时间</span>
           <input
+            data-testid="create-task-due-at"
             type="datetime-local"
             value={form.dueAt}
             onChange={(event) => setForm((current) => ({ ...current, dueAt: event.target.value }))}
@@ -132,7 +137,7 @@ export function CreateTaskForm({
 
       <p style={{ margin: "12px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>{message}</p>
 
-      <button type="submit" disabled={loading} style={buttonStyle}>
+      <button type="submit" data-testid="create-task-submit" disabled={loading} style={buttonStyle}>
         {loading ? "发布中..." : "发布任务"}
       </button>
     </form>

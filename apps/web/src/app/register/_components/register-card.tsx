@@ -70,12 +70,13 @@ export function RegisterCard() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="glass-panel" style={{ padding: 20 }}>
+    <form onSubmit={handleSubmit} className="glass-panel" data-testid="web-register-form" style={{ padding: 20 }}>
       <h2 className="section-title">创建账号</h2>
       <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--text-muted)", fontSize: 14 }}>账号</span>
           <input
+            data-testid="web-register-username"
             value={form.username}
             onChange={(event) => setForm((current) => ({ ...current, username: normalizeUsername(event.target.value) }))}
             placeholder="3-24 位，小写字母/数字/下划线"
@@ -86,6 +87,7 @@ export function RegisterCard() {
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--text-muted)", fontSize: 14 }}>昵称</span>
           <input
+            data-testid="web-register-display-name"
             value={form.displayName}
             onChange={(event) => setForm((current) => ({ ...current, displayName: event.target.value }))}
             placeholder="家里看到的名字"
@@ -96,6 +98,7 @@ export function RegisterCard() {
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--text-muted)", fontSize: 14 }}>密码</span>
           <input
+            data-testid="web-register-password"
             value={form.password}
             onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
             placeholder="至少 6 位"
@@ -106,7 +109,7 @@ export function RegisterCard() {
         </label>
       </div>
       <p className="section-copy">{message}</p>
-      <button type="submit" disabled={loading} style={buttonStyle}>
+      <button type="submit" data-testid="web-register-submit" disabled={loading} style={buttonStyle}>
         {loading ? "注册中..." : "注册并登录"}
       </button>
       <div style={{ marginTop: 14, color: "var(--text-muted)", fontSize: 14 }}>

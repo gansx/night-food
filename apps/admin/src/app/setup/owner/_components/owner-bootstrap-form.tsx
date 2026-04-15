@@ -42,11 +42,12 @@ export function OwnerBootstrapForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="admin-panel" style={{ padding: 20 }}>
+    <form onSubmit={handleSubmit} className="admin-panel" data-testid="owner-bootstrap-form" style={{ padding: 20 }}>
       <div style={{ display: "grid", gap: 14 }}>
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>家庭名称</span>
           <input
+            data-testid="owner-household-name"
             value={form.householdName}
             onChange={(event) => setForm((current) => ({ ...current, householdName: event.target.value }))}
             placeholder="例如：夜食坊之家"
@@ -56,6 +57,7 @@ export function OwnerBootstrapForm() {
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>你的显示名称</span>
           <input
+            data-testid="owner-display-name"
             value={form.displayName ?? ""}
             onChange={(event) => setForm((current) => ({ ...current, displayName: event.target.value }))}
             placeholder="例如：爸爸"
@@ -66,7 +68,7 @@ export function OwnerBootstrapForm() {
 
       <p style={{ margin: "14px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>{message}</p>
 
-      <button type="submit" disabled={loading} style={buttonStyle}>
+      <button type="submit" data-testid="owner-bootstrap-submit" disabled={loading} style={buttonStyle}>
         {loading ? "创建中..." : "创建我的家庭"}
       </button>
     </form>

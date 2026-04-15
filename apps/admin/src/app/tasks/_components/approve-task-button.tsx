@@ -35,6 +35,7 @@ export function ApproveTaskButton({ taskId }: { taskId: string }) {
     <div style={{ display: "grid", gap: 8 }}>
       <button
         type="button"
+        data-testid="approve-task-button"
         onClick={handleApprove}
         disabled={loading}
         style={{

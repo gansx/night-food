@@ -35,6 +35,7 @@ export function SubmitTaskButton({ taskId }: { taskId: string }) {
     <div style={{ display: "grid", gap: 8 }}>
       <button
         type="button"
+        data-testid="submit-task-button"
         onClick={handleSubmitTask}
         disabled={loading}
         style={{
