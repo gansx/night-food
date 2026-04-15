@@ -3,12 +3,23 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function ClaimTaskButton({ taskId }: { taskId: string }) {
+export function ClaimTaskButton({
+  taskId,
+  disabledReason
+}: {
+  taskId: string;
+  disabledReason?: string;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(disabledReason ?? "");
+  const disabled = Boolean(disabledReason) || loading;
 
   async function handleClaim() {
+    if (disabledReason) {
+      return;
+    }
+
     setLoading(true);
     setMessage("");
 
@@ -36,17 +47,18 @@ export function ClaimTaskButton({ taskId }: { taskId: string }) {
       <button
         type="button"
         onClick={handleClaim}
-        disabled={loading}
+        disabled={disabled}
         style={{
           border: 0,
           borderRadius: 999,
           padding: "10px 14px",
-          background: "var(--brand)",
-          color: "#fff",
-          cursor: "pointer"
+          background: disabledReason ? "rgba(255,255,255,0.2)" : "var(--brand)",
+          color: disabledReason ? "var(--text-muted)" : "#fff",
+          cursor: disabled ? "not-allowed" : "pointer",
+          fontWeight: 800
         }}
       >
-        {loading ? "领取中..." : "领取任务"}
+        {disabledReason ? "不可领取" : loading ? "领取中..." : "领取任务"}
       </button>
       {message ? <span style={{ color: "var(--brand-dark)", fontSize: 14 }}>{message}</span> : null}
     </div>

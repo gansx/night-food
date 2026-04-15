@@ -1,10 +1,11 @@
-import { formatDateTime, getOrderStatusLabel } from "@night-food/lib";
+import { canMemberCancelOrder, formatDateTime, getOrderStatusLabel } from "@night-food/lib";
 import type { OrderStatus } from "@night-food/types";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberShell } from "../../_components/member-shell";
 import { getWebViewerSummary } from "../../../lib/auth";
 import { createSupabaseServiceRoleClient } from "../../../lib/supabase/service-role-client";
+import { CancelOrderButton } from "../_components/cancel-order-button";
 
 export default async function OrderDetailPage({
   params
@@ -49,26 +50,33 @@ export default async function OrderDetailPage({
     );
   }
 
+  const statusValue = order.status as OrderStatus;
+
   return (
     <MemberShell title="订单详情" description="查看订单明细、状态变化和家主备注。" activeHref="/orders">
-      <section style={{ display: "grid", gridTemplateColumns: "1fr 0.95fr", gap: 20 }}>
+      <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(280px, 0.95fr)", gap: 20 }}>
         <div className="glass-panel" style={{ padding: 24 }}>
           <Link href="/orders" style={{ color: "var(--brand)", fontWeight: 700 }}>
             返回订单列表
           </Link>
-          <h2 className="section-title" style={{ marginTop: 16, fontSize: 24 }}>
-            {order.order_number}
-          </h2>
-          <div style={{ marginTop: 12, color: "var(--text-muted)", lineHeight: 1.7 }}>
-            状态：{getOrderStatusLabel(order.status as OrderStatus)}
-            <br />
-            小计：{Number(order.subtotal_points)} 积分
-            <br />
-            合计：{Number(order.total_points)} 积分
-            <br />
-            下单时间：{formatDateTime(order.created_at as string)}
-            <br />
-            备注：{(order.remark as string | null) || "无"}
+          <div style={{ marginTop: 16, display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+            <div>
+              <h2 className="section-title" style={{ fontSize: 24 }}>
+                {order.order_number}
+              </h2>
+              <div style={{ marginTop: 12, color: "var(--text-muted)", lineHeight: 1.7 }}>
+                状态：{getOrderStatusLabel(statusValue)}
+                <br />
+                小计：{Number(order.subtotal_points)} 积分
+                <br />
+                合计：{Number(order.total_points)} 积分
+                <br />
+                下单时间：{formatDateTime(order.created_at as string)}
+                <br />
+                备注：{(order.remark as string | null) || "无"}
+              </div>
+            </div>
+            {canMemberCancelOrder(statusValue) ? <CancelOrderButton orderId={order.id as string} /> : null}
           </div>
 
           <div style={{ marginTop: 20, display: "grid", gap: 12 }}>

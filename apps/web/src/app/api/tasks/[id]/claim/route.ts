@@ -1,3 +1,4 @@
+import { isTaskExpired } from "@night-food/lib";
 import { NextResponse } from "next/server";
 import {
   getWebSessionUser,
@@ -36,15 +37,19 @@ export async function POST(
     return NextResponse.json({ error: "家主不能领取任务，请使用成员账号领取。" }, { status: 403 });
   }
 
+  if (task.assigned_user_id && task.assigned_user_id !== user.id) {
+    return NextResponse.json({ error: "这个任务已经指派给其他成员。" }, { status: 403 });
+  }
+
   if (task.status !== "open") {
     return NextResponse.json({ error: "这个任务当前不能领取。" }, { status: 409 });
   }
 
-  if (task.due_at && new Date(task.due_at as string).getTime() < Date.now()) {
+  if (isTaskExpired((task.due_at as string | null) ?? null)) {
     return NextResponse.json({ error: "这个任务已经过期，无法领取。" }, { status: 409 });
   }
 
-  const { error } = await supabase
+  const { data: updatedTask, error } = await supabase
     .from("tasks")
     .update({
       status: "claimed",
@@ -52,10 +57,16 @@ export async function POST(
       updated_at: new Date().toISOString()
     })
     .eq("id", task.id)
-    .eq("status", "open");
+    .eq("status", "open")
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (!updatedTask) {
+    return NextResponse.json({ error: "任务状态已经变化，请刷新后再操作。" }, { status: 409 });
   }
 
   await supabase.from("task_logs").insert({

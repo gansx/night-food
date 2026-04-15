@@ -1,29 +1,21 @@
-import { canTransitionOrderStatus, getOrderStatusLabel } from "@night-food/lib";
+import { canMemberCancelOrder, getOrderStatusLabel } from "@night-food/lib";
 import type { OrderStatus } from "@night-food/types";
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { getAdminSessionUser, requireAdminOwnerMembership } from "../../../../../lib/server/household";
-
-const updateOrderStatusSchema = z.object({
-  status: z.enum(["confirmed", "preparing", "completed", "cancelled"]),
-  note: z.string().trim().max(200).optional().or(z.literal(""))
-});
+import {
+  getWebSessionUser,
+  insertWebAuditLog,
+  requireWebMembership
+} from "../../../../../lib/server/household";
 
 export async function POST(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { supabase, user } = await getAdminSessionUser();
+  const { supabase, user } = await getWebSessionUser();
 
   if (!user) {
     return NextResponse.json({ error: "请先登录。" }, { status: 401 });
-  }
-
-  const raw = (await request.json()) as { status?: OrderStatus; note?: string };
-  const parsed = updateOrderStatusSchema.safeParse(raw);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "参数错误" }, { status: 400 });
   }
 
   const { data: order } = await supabase
@@ -37,17 +29,19 @@ export async function POST(
     return NextResponse.json({ error: "订单不存在。" }, { status: 404 });
   }
 
-  const guard = await requireAdminOwnerMembership(order.household_id as string);
-  if (guard.response || !guard.membership) {
-    return guard.response!;
+  if (order.member_user_id !== user.id) {
+    return NextResponse.json({ error: "只能取消自己的订单。" }, { status: 403 });
+  }
+
+  const membershipGuard = await requireWebMembership(order.household_id as string);
+  if (membershipGuard.response || !membershipGuard.membership) {
+    return membershipGuard.response!;
   }
 
   const currentStatus = order.status as OrderStatus;
-  const targetStatus = parsed.data.status;
-
-  if (!canTransitionOrderStatus(currentStatus, targetStatus)) {
+  if (!canMemberCancelOrder(currentStatus)) {
     return NextResponse.json(
-      { error: `订单当前为${getOrderStatusLabel(currentStatus)}，不能更新为${getOrderStatusLabel(targetStatus)}。` },
+      { error: `订单当前为${getOrderStatusLabel(currentStatus)}，已经不能由成员取消。` },
       { status: 409 }
     );
   }
@@ -55,7 +49,7 @@ export async function POST(
   const { data: updatedOrder, error: updateError } = await supabase
     .from("orders")
     .update({
-      status: targetStatus,
+      status: "cancelled",
       updated_at: new Date().toISOString()
     })
     .eq("id", order.id)
@@ -68,19 +62,19 @@ export async function POST(
   }
 
   if (!updatedOrder) {
-    return NextResponse.json({ error: "订单状态已变化，请刷新后再操作。" }, { status: 409 });
+    return NextResponse.json({ error: "订单状态已经变化，请刷新后再操作。" }, { status: 409 });
   }
 
   await supabase.from("order_status_logs").insert({
     order_id: order.id,
     from_status: currentStatus,
-    to_status: targetStatus,
+    to_status: "cancelled",
     changed_by_user_id: user.id,
-    note: parsed.data.note || `家主将订单更新为${getOrderStatusLabel(targetStatus)}`
+    note: "成员取消订单"
   });
 
   const refundPoints = Number(order.total_points);
-  if (targetStatus === "cancelled" && refundPoints > 0) {
+  if (refundPoints > 0) {
     const { data: existingRefund } = await supabase
       .from("points_transactions")
       .select("id")
@@ -100,7 +94,6 @@ export async function POST(
         .maybeSingle();
 
       const nextBalance = Number(account?.balance ?? 0) + refundPoints;
-
       const { error: refundInsertError } = await supabase.from("points_transactions").insert({
         household_id: order.household_id,
         user_id: order.member_user_id,
@@ -130,13 +123,13 @@ export async function POST(
     }
   }
 
-  await supabase.from("audit_logs").insert({
-    household_id: order.household_id,
-    actor_user_id: user.id,
-    target_type: "order",
-    target_id: order.id,
-    action: `status_${targetStatus}`,
-    detail: parsed.data.note || null
+  await insertWebAuditLog({
+    householdId: order.household_id as string,
+    actorUserId: user.id,
+    targetType: "order",
+    targetId: order.id as string,
+    action: "member_cancel",
+    detail: `成员取消订单：${String(order.order_number)}`
   });
 
   return NextResponse.json({ ok: true });

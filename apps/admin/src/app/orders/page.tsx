@@ -15,7 +15,13 @@ type OrderItemSummary = {
   name: string;
 };
 
-export default async function AdminOrdersPage() {
+const orderStatusOptions = ["all", "submitted", "confirmed", "preparing", "completed", "cancelled"] as const;
+
+export default async function AdminOrdersPage({
+  searchParams
+}: {
+  searchParams: Promise<{ q?: string; status?: string; from?: string; to?: string }>;
+}) {
   const viewer = await getAdminViewerSummary();
 
   if (!viewer) {
@@ -38,14 +44,44 @@ export default async function AdminOrdersPage() {
     );
   }
 
+  const { q, status, from, to } = await searchParams;
+  const keyword = (q ?? "").trim().toLowerCase();
+  const currentStatus = orderStatusOptions.includes((status ?? "all") as never)
+    ? ((status ?? "all") as (typeof orderStatusOptions)[number])
+    : "all";
+
   const supabase = createSupabaseServiceRoleClient();
-  const { data: orders } = await supabase
+  let orderQuery = supabase
     .from("orders")
     .select("id, order_number, status, total_points, created_at, remark")
     .eq("household_id", viewer.householdId)
     .order("created_at", { ascending: false });
 
-  const orderIds = (orders ?? []).map((order) => order.id as string);
+  if (currentStatus !== "all") {
+    orderQuery = orderQuery.eq("status", currentStatus);
+  }
+
+  if (from) {
+    orderQuery = orderQuery.gte("created_at", new Date(`${from}T00:00:00`).toISOString());
+  }
+
+  if (to) {
+    orderQuery = orderQuery.lte("created_at", new Date(`${to}T23:59:59`).toISOString());
+  }
+
+  const { data: orders } = await orderQuery;
+  const filteredOrders = (orders ?? []).filter((order) => {
+    if (!keyword) {
+      return true;
+    }
+
+    return (
+      String(order.order_number).toLowerCase().includes(keyword) ||
+      String(order.remark ?? "").toLowerCase().includes(keyword)
+    );
+  });
+
+  const orderIds = filteredOrders.map((order) => order.id as string);
   const { data: orderItems } = orderIds.length
     ? await supabase
         .from("order_items")
@@ -71,14 +107,38 @@ export default async function AdminOrdersPage() {
   return (
     <AdminShell
       title="订单管理"
-      description="查看全部家庭订单，并推进确认、制作、完成与取消等状态。"
+      description="按状态、订单号、备注和日期筛选订单，并推进确认、制作、完成与取消。"
       activeHref="/orders"
     >
       <section className="admin-panel" style={{ padding: 24 }}>
-        <h2 style={{ margin: 0, fontSize: 20 }}>待处理订单</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 20 }}>订单队列</h2>
+            <p style={{ margin: "8px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>
+              可以用筛选快速定位待处理订单，取消订单时会自动退回积分。
+            </p>
+          </div>
+
+          <form style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <input name="q" defaultValue={q ?? ""} placeholder="订单号或备注" style={filterStyle} />
+            <select name="status" defaultValue={currentStatus} style={filterStyle}>
+              {orderStatusOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option === "all" ? "全部状态" : getOrderStatusLabel(option)}
+                </option>
+              ))}
+            </select>
+            <input name="from" type="date" defaultValue={from ?? ""} style={filterStyle} />
+            <input name="to" type="date" defaultValue={to ?? ""} style={filterStyle} />
+            <button type="submit" style={filterButtonStyle}>
+              筛选
+            </button>
+          </form>
+        </div>
+
         <div style={{ marginTop: 18, display: "grid", gap: 14 }}>
-          {(orders ?? []).length ? (
-            orders?.map((order) => {
+          {filteredOrders.length ? (
+            filteredOrders.map((order) => {
               const transitions = getAllowedOrderTransitions(order.status as OrderStatus);
               const items = orderItemMap.get(order.id as string) ?? [];
 
@@ -116,14 +176,7 @@ export default async function AdminOrdersPage() {
                   <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
                     {items.length ? (
                       items.map((item) => (
-                        <div
-                          key={item.id}
-                          style={{
-                            padding: 12,
-                            borderRadius: 14,
-                            background: "var(--panel-alt)"
-                          }}
-                        >
+                        <div key={item.id} style={{ padding: 12, borderRadius: 14, background: "var(--panel-alt)" }}>
                           {item.name} x {item.quantity} | {item.subtotalPoints} 积分
                         </div>
                       ))
@@ -134,21 +187,21 @@ export default async function AdminOrdersPage() {
 
                   {transitions.length ? (
                     <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
-                      {transitions.map((status) => (
+                      {transitions.map((nextStatus) => (
                         <UpdateOrderStatusButton
-                          key={status}
+                          key={nextStatus}
                           orderId={order.id as string}
-                          targetStatus={status as "confirmed" | "preparing" | "completed" | "cancelled"}
+                          targetStatus={nextStatus as "confirmed" | "preparing" | "completed" | "cancelled"}
                           label={
-                            status === "confirmed"
+                            nextStatus === "confirmed"
                               ? "确认订单"
-                              : status === "preparing"
+                              : nextStatus === "preparing"
                                 ? "开始制作"
-                                : status === "completed"
+                                : nextStatus === "completed"
                                   ? "完成订单"
                                   : "取消订单"
                           }
-                          tone={status === "cancelled" ? "danger" : "primary"}
+                          tone={nextStatus === "cancelled" ? "danger" : "primary"}
                         />
                       ))}
                     </div>
@@ -157,10 +210,27 @@ export default async function AdminOrdersPage() {
               );
             })
           ) : (
-            <div style={{ color: "var(--muted)" }}>当前家庭还没有订单。</div>
+            <div style={{ color: "var(--muted)" }}>当前筛选条件下没有订单。</div>
           )}
         </div>
       </section>
     </AdminShell>
   );
 }
+
+const filterStyle = {
+  borderRadius: 999,
+  border: "1px solid var(--border)",
+  padding: "10px 14px",
+  background: "rgba(255,255,255,0.82)"
+} satisfies React.CSSProperties;
+
+const filterButtonStyle = {
+  border: 0,
+  borderRadius: 999,
+  padding: "10px 16px",
+  background: "var(--brand)",
+  color: "#fff",
+  cursor: "pointer",
+  fontWeight: 800
+} satisfies React.CSSProperties;

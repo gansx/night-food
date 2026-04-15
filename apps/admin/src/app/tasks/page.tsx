@@ -1,4 +1,4 @@
-import { formatDateTime, getTaskStatusLabel } from "@night-food/lib";
+import { formatDateTime, getTaskStatusLabel, isTaskExpired } from "@night-food/lib";
 import type { Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -8,7 +8,7 @@ import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role
 import { ApproveTaskButton } from "./_components/approve-task-button";
 import { CreateTaskForm } from "./_components/create-task-form";
 
-const statusOptions = ["all", "open", "claimed", "submitted", "completed", "cancelled"] as const;
+const statusOptions = ["all", "open", "claimed", "in_progress", "submitted", "completed", "cancelled"] as const;
 
 export default async function AdminTasksPage({
   searchParams
@@ -46,7 +46,7 @@ export default async function AdminTasksPage({
   let taskQuery = supabase
     .from("tasks")
     .select(
-      "id, title, description, reward_points, status, assigned_user_id, due_at, created_at, profiles:assigned_user_id(display_name)"
+      "id, title, description, reward_points, status, assigned_user_id, due_at, created_at, profiles:assigned_user_id(display_name, username)"
     )
     .eq("household_id", viewer.householdId)
     .order("created_at", { ascending: false });
@@ -55,21 +55,52 @@ export default async function AdminTasksPage({
     taskQuery = taskQuery.eq("status", currentStatus);
   }
 
-  const { data: tasks } = await taskQuery;
+  const [{ data: tasks }, { data: householdMembers }] = await Promise.all([
+    taskQuery,
+    supabase
+      .from("household_members")
+      .select("user_id, role, status")
+      .eq("household_id", viewer.householdId)
+      .eq("status", "active")
+  ]);
+
+  const memberUserIds = (householdMembers ?? []).map((member) => member.user_id as string);
+  const { data: profiles } = memberUserIds.length
+    ? await supabase.from("profiles").select("id, display_name, username").in("id", memberUserIds)
+    : { data: [] as Array<Record<string, unknown>> };
+
+  const profileMap = new Map(
+    (profiles ?? []).map((profile) => [
+      profile.id as string,
+      {
+        displayName: profile.display_name as string | null,
+        username: profile.username as string | null
+      }
+    ])
+  );
+  const assignableMembers = (householdMembers ?? [])
+    .filter((member) => member.role !== "owner")
+    .map((member) => {
+      const profile = profileMap.get(member.user_id as string);
+      return {
+        id: member.user_id as string,
+        label: profile?.displayName || profile?.username || "家庭成员"
+      };
+    });
 
   return (
     <AdminShell
       title="任务管理"
-      description="发布家庭任务、筛选状态、查看详情和审批积分结算。"
+      description="发布公开任务或直接指派给家人，查看到期状态并审核积分结算。"
       activeHref="/tasks"
     >
-      <section style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 20 }}>
+      <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.15fr) minmax(300px, 0.85fr)", gap: 20 }}>
         <div className="admin-panel" style={{ padding: 24 }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
             <div>
               <h2 style={{ margin: 0, fontSize: 20 }}>任务列表</h2>
               <p style={{ margin: "8px 0 0", color: "var(--muted)", lineHeight: 1.6 }}>
-                可按状态筛选，点进详情可以查看任务日志。
+                公开任务由成员领取，指派任务会直接进入对应成员的我的任务。
               </p>
             </div>
 
@@ -91,6 +122,7 @@ export default async function AdminTasksPage({
             {(tasks ?? []).length ? (
               tasks?.map((task) => {
                 const assignedProfile = Array.isArray(task.profiles) ? task.profiles[0] : task.profiles;
+                const expired = isTaskExpired((task.due_at as string | null) ?? null);
                 return (
                   <article
                     key={task.id}
@@ -107,9 +139,16 @@ export default async function AdminTasksPage({
                           {task.title as string}
                         </Link>
                         <div style={{ marginTop: 8, color: "var(--muted)", fontSize: 14, lineHeight: 1.7 }}>
-                          {getTaskStatusLabel(task.status as never)} | 奖励 {Number(task.reward_points)} 积分
+                          {getTaskStatusLabel(task.status as never)}
+                          {expired && ["open", "claimed", "in_progress"].includes(String(task.status))
+                            ? " | 已过期"
+                            : ""}{" "}
+                          | 奖励 {Number(task.reward_points)} 积分
                           <br />
-                          成员：{(assignedProfile?.display_name as string | undefined) ?? "未领取"}
+                          成员：
+                          {(assignedProfile?.display_name as string | undefined) ||
+                            (assignedProfile?.username as string | undefined) ||
+                            "未领取"}
                           <br />
                           截止：{formatDateTime((task.due_at as string | null) ?? null)}
                         </div>
@@ -137,7 +176,7 @@ export default async function AdminTasksPage({
           </div>
         </div>
 
-        <CreateTaskForm householdId={viewer.householdId} />
+        <CreateTaskForm householdId={viewer.householdId} members={assignableMembers} />
       </section>
     </AdminShell>
   );
@@ -156,5 +195,6 @@ const filterButtonStyle = {
   padding: "10px 14px",
   background: "var(--brand)",
   color: "#fff",
-  cursor: "pointer"
+  cursor: "pointer",
+  fontWeight: 800
 } satisfies React.CSSProperties;

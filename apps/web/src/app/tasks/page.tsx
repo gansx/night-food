@@ -1,4 +1,4 @@
-import { formatDateTime, getTaskStatusLabel } from "@night-food/lib";
+import { formatDateTime, getTaskStatusLabel, isTaskExpired } from "@night-food/lib";
 import type { Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -8,7 +8,7 @@ import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role
 import { ClaimTaskButton } from "./_components/claim-task-button";
 import { SubmitTaskButton } from "./_components/submit-task-button";
 
-const filterOptions = ["all", "open", "claimed", "submitted", "completed", "cancelled"] as const;
+const filterOptions = ["all", "open", "claimed", "in_progress", "submitted", "completed", "cancelled"] as const;
 
 export default async function TasksPage({
   searchParams
@@ -61,18 +61,18 @@ export default async function TasksPage({
     return task.status === currentFilter;
   });
 
-  const openTasks = filteredTasks.filter((task) => task.status === "open");
-  const myTasks = filteredTasks.filter(
-    (task) => task.assigned_user_id === viewer.userId || task.status === "open"
+  const openTasks = filteredTasks.filter(
+    (task) => task.status === "open" && (!task.assigned_user_id || task.assigned_user_id === viewer.userId)
   );
+  const myTasks = filteredTasks.filter((task) => task.assigned_user_id === viewer.userId);
 
   return (
     <MemberShell
       title="家庭任务中心"
-      description="领取任务、提交完成、查看截止时间和积分到账状态。"
+      description="领取公开任务，或处理家主指派给你的任务，完成后赚取家庭积分。"
       activeHref="/tasks"
     >
-      <section style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 20 }}>
+      <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(280px, 320px)", gap: 20 }}>
         <div className="glass-panel" style={{ padding: 24 }}>
           <div
             style={{
@@ -88,7 +88,7 @@ export default async function TasksPage({
             当前规则：
             {settings?.task_approval_required === false
               ? "任务完成后自动到账积分。"
-              : "任务完成后需要家主审批才能发放积分。"}
+              : "任务完成后需要家主审核才会发放积分。"}
           </div>
 
           <form style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
@@ -107,37 +107,44 @@ export default async function TasksPage({
           <h2 className="section-title">可领取任务</h2>
           <div style={{ marginTop: 18, display: "grid", gap: 14 }}>
             {openTasks.length ? (
-              openTasks.map((task) => (
-                <article
-                  key={task.id}
-                  style={{
-                    padding: 16,
-                    borderRadius: 18,
-                    background: "rgba(255,255,255,0.72)",
-                    border: "1px solid var(--border-soft)"
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                    <div>
-                      <Link href={`/tasks/${task.id}` as Route} style={{ fontWeight: 700 }}>
-                        {task.title as string}
-                      </Link>
-                      <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 14 }}>
-                        截止：{formatDateTime((task.due_at as string | null) ?? null)}
+              openTasks.map((task) => {
+                const expired = isTaskExpired((task.due_at as string | null) ?? null);
+                return (
+                  <article
+                    key={task.id}
+                    style={{
+                      padding: 16,
+                      borderRadius: 18,
+                      background: "rgba(255,255,255,0.72)",
+                      border: "1px solid var(--border-soft)"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                      <div>
+                        <Link href={`/tasks/${task.id}` as Route} style={{ fontWeight: 700 }}>
+                          {task.title as string}
+                        </Link>
+                        <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 14 }}>
+                          截止：{formatDateTime((task.due_at as string | null) ?? null)}
+                          {expired ? " | 已过期" : ""}
+                        </div>
                       </div>
+                      <span style={{ color: "var(--accent)", fontWeight: 800 }}>
+                        +{Number(task.reward_points)}
+                      </span>
                     </div>
-                    <span style={{ color: "var(--accent)", fontWeight: 800 }}>
-                      +{Number(task.reward_points)}
-                    </span>
-                  </div>
-                  <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 14 }}>
-                    {(task.description as string | null) || "家庭任务"}
-                  </div>
-                  <div style={{ marginTop: 12 }}>
-                    <ClaimTaskButton taskId={task.id as string} />
-                  </div>
-                </article>
-              ))
+                    <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 14 }}>
+                      {(task.description as string | null) || "家庭任务"}
+                    </div>
+                    <div style={{ marginTop: 12 }}>
+                      <ClaimTaskButton
+                        taskId={task.id as string}
+                        disabledReason={expired ? "这个任务已经过期，无法领取。" : undefined}
+                      />
+                    </div>
+                  </article>
+                );
+              })
             ) : (
               <div style={{ color: "var(--text-muted)" }}>目前没有开放任务。</div>
             )}
@@ -147,10 +154,10 @@ export default async function TasksPage({
         <aside className="glass-panel" style={{ padding: 24 }}>
           <h2 className="section-title">我的任务</h2>
           <div style={{ marginTop: 18, display: "grid", gap: 14 }}>
-            {myTasks.filter((task) => task.assigned_user_id === viewer.userId).length ? (
-              myTasks
-                .filter((task) => task.assigned_user_id === viewer.userId)
-                .map((task) => (
+            {myTasks.length ? (
+              myTasks.map((task) => {
+                const expired = isTaskExpired((task.due_at as string | null) ?? null);
+                return (
                   <article
                     key={task.id}
                     style={{
@@ -168,6 +175,7 @@ export default async function TasksPage({
                     </div>
                     <div style={{ marginTop: 6, color: "var(--text-muted)", fontSize: 14 }}>
                       截止：{formatDateTime((task.due_at as string | null) ?? null)}
+                      {expired && ["claimed", "in_progress"].includes(String(task.status)) ? " | 已过期" : ""}
                     </div>
                     {["claimed", "in_progress"].includes(String(task.status)) ? (
                       <div style={{ marginTop: 12 }}>
@@ -175,9 +183,10 @@ export default async function TasksPage({
                       </div>
                     ) : null}
                   </article>
-                ))
+                );
+              })
             ) : (
-              <div style={{ color: "var(--text-muted)" }}>你还没有领取任何任务。</div>
+              <div style={{ color: "var(--text-muted)" }}>你还没有领取或被指派任务。</div>
             )}
           </div>
 
@@ -216,5 +225,6 @@ const filterButtonStyle = {
   padding: "10px 14px",
   background: "var(--brand)",
   color: "#fff",
-  cursor: "pointer"
+  cursor: "pointer",
+  fontWeight: 800
 } satisfies React.CSSProperties;

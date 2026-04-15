@@ -88,6 +88,7 @@ export type CreateTaskPayload = {
   description?: string;
   rewardPoints: number;
   dueAt?: string;
+  assignedUserId?: string;
 };
 
 export type HouseholdSettingsPayload = {

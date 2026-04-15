@@ -3,16 +3,28 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function CreateTaskForm({ householdId }: { householdId: string }) {
+type TaskAssigneeOption = {
+  id: string;
+  label: string;
+};
+
+export function CreateTaskForm({
+  householdId,
+  members
+}: {
+  householdId: string;
+  members: TaskAssigneeOption[];
+}) {
   const router = useRouter();
   const [form, setForm] = useState({
     householdId,
     title: "",
     description: "",
     rewardPoints: 10,
-    dueAt: ""
+    dueAt: "",
+    assignedUserId: ""
   });
-  const [message, setMessage] = useState("发布后家人就能在任务中心看到它。");
+  const [message, setMessage] = useState("发布后，公开任务会出现在任务中心；指派任务会直接进入成员的我的任务。");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -43,7 +55,8 @@ export function CreateTaskForm({ householdId }: { householdId: string }) {
         title: "",
         description: "",
         rewardPoints: 10,
-        dueAt: ""
+        dueAt: "",
+        assignedUserId: ""
       }));
       setMessage("任务已发布。");
       router.refresh();
@@ -71,12 +84,25 @@ export function CreateTaskForm({ householdId }: { householdId: string }) {
           <span style={{ color: "var(--muted)", fontSize: 14 }}>任务说明</span>
           <textarea
             value={form.description}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, description: event.target.value }))
-            }
+            onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
             placeholder="补充完成标准、时间要求等"
             style={{ ...inputStyle, minHeight: 96, resize: "vertical" }}
           />
+        </label>
+        <label style={{ display: "grid", gap: 8 }}>
+          <span style={{ color: "var(--muted)", fontSize: 14 }}>指派成员</span>
+          <select
+            value={form.assignedUserId}
+            onChange={(event) => setForm((current) => ({ ...current, assignedUserId: event.target.value }))}
+            style={inputStyle}
+          >
+            <option value="">不指定，公开领取</option>
+            {members.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.label}
+              </option>
+            ))}
+          </select>
         </label>
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>奖励积分</span>
@@ -129,5 +155,6 @@ const buttonStyle = {
   padding: "12px 18px",
   background: "var(--brand)",
   color: "#fff",
-  cursor: "pointer"
+  cursor: "pointer",
+  fontWeight: 800
 } satisfies React.CSSProperties;

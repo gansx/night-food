@@ -8,7 +8,8 @@ const createTaskSchema = z.object({
   title: z.string().trim().min(1, "请填写任务标题。").max(80, "任务标题最多 80 个字。"),
   description: z.string().trim().max(200, "任务说明最多 200 个字。").optional().or(z.literal("")),
   rewardPoints: z.number().int().min(1, "奖励积分至少为 1。"),
-  dueAt: z.string().datetime().optional().or(z.literal(""))
+  dueAt: z.string().datetime().optional().or(z.literal("")),
+  assignedUserId: z.string().uuid().optional().or(z.literal(""))
 });
 
 export async function POST(request: Request) {
@@ -27,6 +28,22 @@ export async function POST(request: Request) {
     return guard.response!;
   }
 
+  const assignedUserId = parsed.data.assignedUserId || null;
+  if (assignedUserId) {
+    const { data: assignedMember } = await guard.supabase
+      .from("household_members")
+      .select("user_id, status")
+      .eq("household_id", parsed.data.householdId)
+      .eq("user_id", assignedUserId)
+      .limit(1)
+      .maybeSingle();
+
+    if (!assignedMember || assignedMember.status !== "active") {
+      return NextResponse.json({ error: "指派成员不在当前家庭，或访问状态无效。" }, { status: 400 });
+    }
+  }
+
+  const initialStatus = assignedUserId ? "claimed" : "open";
   const { data: task, error } = await guard.supabase
     .from("tasks")
     .insert({
@@ -35,7 +52,8 @@ export async function POST(request: Request) {
       description: parsed.data.description || null,
       reward_points: parsed.data.rewardPoints,
       due_at: parsed.data.dueAt || null,
-      status: "open",
+      status: initialStatus,
+      assigned_user_id: assignedUserId,
       created_by_user_id: guard.user.id
     })
     .select("id, title")
@@ -48,9 +66,9 @@ export async function POST(request: Request) {
   await guard.supabase.from("task_logs").insert({
     task_id: task.id,
     from_status: null,
-    to_status: "open",
+    to_status: initialStatus,
     changed_by_user_id: guard.user.id,
-    note: "家主创建任务"
+    note: assignedUserId ? "家主创建并指派任务" : "家主创建任务"
   });
 
   await insertAdminAuditLog({
@@ -58,7 +76,7 @@ export async function POST(request: Request) {
     actorUserId: guard.user.id,
     targetType: "task",
     targetId: task.id as string,
-    action: "create",
+    action: assignedUserId ? "create_assigned" : "create",
     detail: `创建任务：${task.title as string}`
   });
 

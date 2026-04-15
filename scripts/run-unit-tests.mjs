@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  canMemberCancelOrder,
   canTransitionOrderStatus,
   canTransitionTaskStatus,
   createFamilyCode,
@@ -7,6 +8,7 @@ import {
   formatOrderingWindow,
   getUsernameFromAuthEmail,
   getInvitationStatusLabel,
+  isTaskExpired,
   isValidUsername,
   normalizeEmail
 } from "../packages/lib/src/index.ts";
@@ -48,9 +50,22 @@ run("order transitions follow the designed state machine", () => {
   assert.equal(canTransitionOrderStatus("completed", "cancelled"), false);
 });
 
+run("members can only cancel orders before preparation starts", () => {
+  assert.equal(canMemberCancelOrder("submitted"), true);
+  assert.equal(canMemberCancelOrder("confirmed"), true);
+  assert.equal(canMemberCancelOrder("preparing"), false);
+});
+
 run("task transitions follow the designed state machine", () => {
   assert.equal(canTransitionTaskStatus("cancelled", "open"), true);
   assert.equal(canTransitionTaskStatus("completed", "open"), false);
+});
+
+run("task expiry helper handles missing, future and past due dates", () => {
+  const now = new Date("2026-04-15T12:00:00.000Z");
+  assert.equal(isTaskExpired(null, now), false);
+  assert.equal(isTaskExpired("2026-04-15T11:59:59.000Z", now), true);
+  assert.equal(isTaskExpired("2026-04-15T12:00:01.000Z", now), false);
 });
 
 run("invitation labels are user-friendly", () => {

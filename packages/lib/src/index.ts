@@ -194,12 +194,25 @@ export function canTransitionOrderStatus(from: OrderStatus, to: OrderStatus): bo
   return getAllowedOrderTransitions(from).includes(to);
 }
 
+export function canMemberCancelOrder(status: OrderStatus): boolean {
+  return status === "submitted" || status === "confirmed";
+}
+
 export function getAllowedTaskTransitions(status: TaskStatus): TaskStatus[] {
   return taskTransitions[status] ?? [];
 }
 
 export function canTransitionTaskStatus(from: TaskStatus, to: TaskStatus): boolean {
   return getAllowedTaskTransitions(from).includes(to);
+}
+
+export function isTaskExpired(dueAt?: string | null, now = new Date()): boolean {
+  if (!dueAt) {
+    return false;
+  }
+
+  const dueTime = new Date(dueAt).getTime();
+  return Number.isFinite(dueTime) && dueTime < now.getTime();
 }
 
 function normalizeTimeInput(value?: string | null): string | null {

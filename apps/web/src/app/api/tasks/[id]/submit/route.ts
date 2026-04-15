@@ -1,3 +1,4 @@
+import { isTaskExpired } from "@night-food/lib";
 import { NextResponse } from "next/server";
 import { getWebSessionUser, insertWebAuditLog } from "../../../../../lib/server/household";
 
@@ -14,7 +15,7 @@ export async function POST(
 
   const { data: task } = await supabase
     .from("tasks")
-    .select("id, household_id, status, reward_points, assigned_user_id, title")
+    .select("id, household_id, status, reward_points, assigned_user_id, title, due_at")
     .eq("id", id)
     .limit(1)
     .maybeSingle();
@@ -36,11 +37,15 @@ export async function POST(
   }
 
   if (task.assigned_user_id !== user.id) {
-    return NextResponse.json({ error: "只有领取任务的成员才能提交完成。" }, { status: 403 });
+    return NextResponse.json({ error: "只有领取或被指派任务的成员才能提交完成。" }, { status: 403 });
   }
 
   if (!["claimed", "in_progress"].includes(String(task.status))) {
     return NextResponse.json({ error: "当前任务不能提交完成。" }, { status: 409 });
+  }
+
+  if (isTaskExpired((task.due_at as string | null) ?? null)) {
+    return NextResponse.json({ error: "这个任务已经过期，无法继续提交。" }, { status: 409 });
   }
 
   const { data: settings } = await supabase
@@ -53,7 +58,7 @@ export async function POST(
   const approvalRequired = settings?.task_approval_required !== false;
   const nextStatus = approvalRequired ? "submitted" : "completed";
 
-  const { error } = await supabase
+  const { data: updatedTask, error } = await supabase
     .from("tasks")
     .update({
       status: nextStatus,
@@ -61,10 +66,17 @@ export async function POST(
       approved_by_user_id: approvalRequired ? null : user.id,
       updated_at: new Date().toISOString()
     })
-    .eq("id", task.id);
+    .eq("id", task.id)
+    .eq("status", task.status)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (!updatedTask) {
+    return NextResponse.json({ error: "任务状态已经变化，请刷新后再操作。" }, { status: 409 });
   }
 
   await supabase.from("task_logs").insert({
@@ -72,7 +84,7 @@ export async function POST(
     from_status: task.status,
     to_status: nextStatus,
     changed_by_user_id: user.id,
-    note: approvalRequired ? "成员提交任务，等待家主审批" : "成员提交任务，系统自动结算积分"
+    note: approvalRequired ? "成员提交任务，等待家主审核" : "成员提交任务，系统自动结算积分"
   });
 
   if (!approvalRequired) {
