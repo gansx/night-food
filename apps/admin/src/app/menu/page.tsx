@@ -39,7 +39,6 @@ export default async function MenuPage({
 
   const { q, category, status, featured } = await searchParams;
   const search = (q ?? "").trim().toLowerCase();
-  const categoryFilter = category ?? "all";
   const statusFilter = status ?? "all";
   const featuredFilter = featured ?? "all";
 
@@ -63,6 +62,12 @@ export default async function MenuPage({
     id: categoryItem.id as string,
     name: categoryItem.name as string
   }));
+  const selectedCategoryId = categoryOptions.some((option) => option.id === category)
+    ? (category as string)
+    : (categoryOptions[0]?.id ?? "");
+  const visibleCategories = selectedCategoryId
+    ? (categories ?? []).filter((categoryItem) => categoryItem.id === selectedCategoryId)
+    : [];
 
   const filteredItems = (items ?? []).filter((item) => {
     const matchesSearch =
@@ -71,7 +76,7 @@ export default async function MenuPage({
       String(item.description ?? "")
         .toLowerCase()
         .includes(search);
-    const matchesCategory = categoryFilter === "all" || item.category_id === categoryFilter;
+    const matchesCategory = selectedCategoryId ? item.category_id === selectedCategoryId : false;
     const matchesStatus =
       statusFilter === "all" ||
       (statusFilter === "available" ? Boolean(item.is_available) : !Boolean(item.is_available));
@@ -102,11 +107,11 @@ export default async function MenuPage({
               <div style={{ minWidth: 170 }}>
                 <OrbitFormSelect
                   name="category"
-                  defaultValue={categoryFilter}
-                  options={[
-                    { value: "all", label: "全部分类" },
-                    ...categoryOptions.map((option) => ({ value: option.id, label: option.name }))
-                  ]}
+                  defaultValue={selectedCategoryId}
+                  placeholder="先创建分类"
+                  disabled={!categoryOptions.length}
+                  submitOnChange
+                  options={categoryOptions.map((option) => ({ value: option.id, label: option.name }))}
                 />
               </div>
               <div style={{ minWidth: 150 }}>
@@ -118,6 +123,7 @@ export default async function MenuPage({
                     { value: "available", label: "已上架" },
                     { value: "unavailable", label: "已下架" }
                   ]}
+                  submitOnChange
                 />
               </div>
               <div style={{ minWidth: 190 }}>
@@ -129,6 +135,7 @@ export default async function MenuPage({
                     { value: "featured", label: "仅今日推荐" },
                     { value: "normal", label: "仅普通菜品" }
                   ]}
+                  submitOnChange
                 />
               </div>
               <button type="submit" style={filterButtonStyle}>
@@ -138,8 +145,8 @@ export default async function MenuPage({
           </div>
 
           <div style={{ marginTop: 18, display: "grid", gap: 16 }}>
-            {(categories ?? []).length ? (
-              categories?.map((categoryItem) => {
+            {visibleCategories.length ? (
+              visibleCategories.map((categoryItem) => {
                 const categoryItems = filteredItems.filter((item) => item.category_id === categoryItem.id);
                 return (
                   <article

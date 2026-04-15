@@ -158,7 +158,8 @@ export function OrbitFormSelect({
   options,
   placeholder,
   disabled = false,
-  testId
+  testId,
+  submitOnChange = false
 }: {
   name: string;
   defaultValue: string;
@@ -166,15 +167,27 @@ export function OrbitFormSelect({
   placeholder?: string;
   disabled?: boolean;
   testId?: string;
+  submitOnChange?: boolean;
 }) {
   const [value, setValue] = useState(defaultValue);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function handleChange(nextValue: string) {
+    setValue(nextValue);
+    if (inputRef.current) {
+      inputRef.current.value = nextValue;
+    }
+    if (submitOnChange) {
+      window.setTimeout(() => inputRef.current?.form?.requestSubmit(), 0);
+    }
+  }
 
   return (
     <>
-      <input type="hidden" name={name} value={value} />
+      <input ref={inputRef} type="hidden" name={name} value={value} />
       <OrbitSelect
         value={value}
-        onChange={setValue}
+        onChange={handleChange}
         options={options}
         placeholder={placeholder}
         disabled={disabled}
