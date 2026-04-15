@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function CreateCategoryForm({ householdId }: { householdId: string }) {
+export function CreateCategoryForm({ householdId, onChanged }: { householdId: string; onChanged?: () => void }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [message, setMessage] = useState("先创建分类，再把家庭菜品放进去。");
@@ -34,7 +34,11 @@ export function CreateCategoryForm({ householdId }: { householdId: string }) {
 
       setName("");
       setMessage("分类创建成功。");
-      router.refresh();
+      if (onChanged) {
+        onChanged();
+      } else {
+        router.refresh();
+      }
     } catch {
       setMessage("网络异常，请稍后重试。");
     } finally {

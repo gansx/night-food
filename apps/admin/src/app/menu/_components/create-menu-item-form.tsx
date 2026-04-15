@@ -12,15 +12,19 @@ type MenuCategoryOption = {
 
 export function CreateMenuItemForm({
   householdId,
-  categories
+  categories,
+  defaultCategoryId,
+  onChanged
 }: {
   householdId: string;
   categories: MenuCategoryOption[];
+  defaultCategoryId?: string;
+  onChanged?: () => void;
 }) {
   const router = useRouter();
   const [form, setForm] = useState({
     householdId,
-    categoryId: categories[0]?.id ?? "",
+    categoryId: defaultCategoryId || categories[0]?.id || "",
     name: "",
     description: "",
     pricePoints: 0,
@@ -33,10 +37,12 @@ export function CreateMenuItemForm({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!form.categoryId && categories[0]?.id) {
-      setForm((current) => ({ ...current, categoryId: categories[0].id }));
+    const fallbackCategoryId = defaultCategoryId || categories[0]?.id || "";
+    const categoryStillExists = categories.some((category) => category.id === form.categoryId);
+    if (fallbackCategoryId && (!form.categoryId || !categoryStillExists)) {
+      setForm((current) => ({ ...current, categoryId: fallbackCategoryId }));
     }
-  }, [categories, form.categoryId]);
+  }, [categories, defaultCategoryId, form.categoryId]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,7 +66,7 @@ export function CreateMenuItemForm({
 
       setForm((current) => ({
         ...current,
-        categoryId: categories[0]?.id ?? current.categoryId,
+        categoryId: defaultCategoryId || categories[0]?.id || current.categoryId,
         name: "",
         description: "",
         pricePoints: 0,
@@ -70,7 +76,11 @@ export function CreateMenuItemForm({
         isFeatured: false
       }));
       setMessage("菜品创建成功。");
-      router.refresh();
+      if (onChanged) {
+        onChanged();
+      } else {
+        router.refresh();
+      }
     } catch {
       setMessage("网络异常，请稍后重试。");
     } finally {

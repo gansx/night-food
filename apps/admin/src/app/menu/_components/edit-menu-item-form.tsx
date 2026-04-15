@@ -6,9 +6,11 @@ import { ImageUploadField } from "./image-upload-field";
 
 export function EditMenuItemForm({
   id,
-  initialValue
+  initialValue,
+  onChanged
 }: {
   id: string;
+  onChanged?: () => void;
   initialValue: {
     categoryId: string;
     name: string;
@@ -45,7 +47,11 @@ export function EditMenuItemForm({
       }
 
       setMessage("菜品已更新。");
-      router.refresh();
+      if (onChanged) {
+        onChanged();
+      } else {
+        router.refresh();
+      }
     } catch {
       setMessage("网络异常，请稍后重试。");
     } finally {
@@ -72,7 +78,11 @@ export function EditMenuItemForm({
         return;
       }
 
-      router.refresh();
+      if (onChanged) {
+        onChanged();
+      } else {
+        router.refresh();
+      }
     } catch {
       setMessage("网络异常，请稍后重试。");
     } finally {

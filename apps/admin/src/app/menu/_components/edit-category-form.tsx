@@ -7,12 +7,14 @@ export function EditCategoryForm({
   id,
   initialName,
   initialSortOrder,
-  initialIsActive
+  initialIsActive,
+  onChanged
 }: {
   id: string;
   initialName: string;
   initialSortOrder: number;
   initialIsActive: boolean;
+  onChanged?: () => void;
 }) {
   const router = useRouter();
   const [name, setName] = useState(initialName);
@@ -45,7 +47,11 @@ export function EditCategoryForm({
       }
 
       setMessage("分类已更新。");
-      router.refresh();
+      if (onChanged) {
+        onChanged();
+      } else {
+        router.refresh();
+      }
     } catch {
       setMessage("网络异常，请稍后重试。");
     } finally {
@@ -72,7 +78,11 @@ export function EditCategoryForm({
         return;
       }
 
-      router.refresh();
+      if (onChanged) {
+        onChanged();
+      } else {
+        router.refresh();
+      }
     } catch {
       setMessage("网络异常，请稍后重试。");
     } finally {

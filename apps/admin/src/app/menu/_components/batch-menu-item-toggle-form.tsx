@@ -11,10 +11,12 @@ type BatchItem = {
 
 export function BatchMenuItemToggleForm({
   householdId,
-  items
+  items,
+  onChanged
 }: {
   householdId: string;
   items: BatchItem[];
+  onChanged?: () => void;
 }) {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -54,7 +56,11 @@ export function BatchMenuItemToggleForm({
       }
       setSelectedIds([]);
       setMessage(isAvailable ? "已批量上架。" : "已批量下架。");
-      router.refresh();
+      if (onChanged) {
+        onChanged();
+      } else {
+        router.refresh();
+      }
     } catch {
       setMessage("网络异常，请稍后重试。");
     } finally {
