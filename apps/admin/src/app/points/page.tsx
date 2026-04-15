@@ -5,6 +5,12 @@ import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role
 import { AdminShell } from "../_components/admin-shell";
 import { PointsAdjustForm } from "./_components/points-adjust-form";
 
+type MemberSummary = {
+  userId: string;
+  label: string;
+  balance: number;
+};
+
 export default async function PointsPage({
   searchParams
 }: {
@@ -39,12 +45,17 @@ export default async function PointsPage({
   const to = from + pageSize - 1;
 
   const supabase = createSupabaseServiceRoleClient();
-  const [{ data: members }, { data: transactions, count }] = await Promise.all([
+  const [{ data: householdMembers }, { data: accounts }, { data: transactions, count }] = await Promise.all([
     supabase
       .from("household_members")
-      .select("user_id, profiles(display_name), points_accounts(balance)")
+      .select("user_id, role, status")
       .eq("household_id", viewer.householdId)
-      .eq("status", "active"),
+      .eq("status", "active")
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("points_accounts")
+      .select("user_id, balance")
+      .eq("household_id", viewer.householdId),
     supabase
       .from("points_transactions")
       .select("id, direction, amount, description, user_id, created_at", { count: "exact" })
@@ -52,6 +63,33 @@ export default async function PointsPage({
       .order("created_at", { ascending: false })
       .range(from, to)
   ]);
+
+  const memberUserIds = (householdMembers ?? []).map((member) => member.user_id as string);
+  const { data: profiles } = memberUserIds.length
+    ? await supabase.from("profiles").select("user_id, display_name, username").in("user_id", memberUserIds)
+    : { data: [] as Array<Record<string, unknown>> };
+
+  const profileMap = new Map(
+    (profiles ?? []).map((profile) => [
+      profile.user_id as string,
+      {
+        displayName: profile.display_name as string | null,
+        username: profile.username as string | null
+      }
+    ])
+  );
+  const accountMap = new Map(
+    (accounts ?? []).map((account) => [account.user_id as string, Number(account.balance ?? 0)])
+  );
+  const members: MemberSummary[] = (householdMembers ?? []).map((member, index) => {
+    const userId = member.user_id as string;
+    const profile = profileMap.get(userId);
+    return {
+      userId,
+      label: profile?.displayName || profile?.username || `成员 ${index + 1}`,
+      balance: accountMap.get(userId) ?? 0
+    };
+  });
 
   const totalPages = Math.max(Math.ceil((count ?? 0) / pageSize), 1);
 
@@ -65,14 +103,10 @@ export default async function PointsPage({
         <div className="admin-panel" style={{ padding: 24 }}>
           <h2 style={{ margin: 0, fontSize: 20 }}>成员积分统计</h2>
           <div style={{ marginTop: 16, display: "grid", gap: 12 }}>
-            {(members ?? []).map((member, index) => {
-              const profile = Array.isArray(member.profiles) ? member.profiles[0] : member.profiles;
-              const account = Array.isArray(member.points_accounts)
-                ? member.points_accounts[0]
-                : member.points_accounts;
-              return (
+            {members.length ? (
+              members.map((member) => (
                 <div
-                  key={`${member.user_id}-${index}`}
+                  key={member.userId}
                   style={{
                     padding: 14,
                     borderRadius: 16,
@@ -83,11 +117,13 @@ export default async function PointsPage({
                     gap: 12
                   }}
                 >
-                  <strong>{(profile?.display_name as string | undefined) ?? "家庭成员"}</strong>
-                  <span>{Number(account?.balance ?? 0)} 积分</span>
+                  <strong>{member.label}</strong>
+                  <span>{member.balance} 积分</span>
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              <div style={{ color: "var(--muted)" }}>当前家庭还没有可调整积分的活跃成员。</div>
+            )}
           </div>
 
           <h2 style={{ margin: "24px 0 0", fontSize: 20 }}>积分流水</h2>
@@ -140,13 +176,10 @@ export default async function PointsPage({
 
         <PointsAdjustForm
           householdId={viewer.householdId}
-          members={(members ?? []).map((member, index) => {
-            const profile = Array.isArray(member.profiles) ? member.profiles[0] : member.profiles;
-            return {
-              id: member.user_id as string,
-              label: (profile?.display_name as string | undefined) ?? `成员 ${index + 1}`
-            };
-          })}
+          members={members.map((member) => ({
+            id: member.userId,
+            label: member.label
+          }))}
         />
       </section>
     </AdminShell>

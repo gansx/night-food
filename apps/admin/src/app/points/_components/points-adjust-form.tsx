@@ -59,11 +59,15 @@ export function PointsAdjustForm({
       <h3 style={{ margin: 0, fontSize: 18 }}>手动调整积分</h3>
       <div style={{ marginTop: 14, display: "grid", gap: 12 }}>
         <select value={userId} onChange={(event) => setUserId(event.target.value)} style={inputStyle}>
-          {members.map((member) => (
-            <option key={member.id} value={member.id}>
-              {member.label}
-            </option>
-          ))}
+          {members.length ? (
+            members.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.label}
+              </option>
+            ))
+          ) : (
+            <option value="">暂无可调整成员</option>
+          )}
         </select>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <select

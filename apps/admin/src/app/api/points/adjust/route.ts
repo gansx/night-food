@@ -32,6 +32,19 @@ export async function POST(request: Request) {
     return guard.response!;
   }
 
+  const { data: targetMembership } = await guard.supabase
+    .from("household_members")
+    .select("id, status")
+    .eq("household_id", parsed.data.householdId)
+    .eq("user_id", parsed.data.userId)
+    .eq("status", "active")
+    .limit(1)
+    .maybeSingle();
+
+  if (!targetMembership) {
+    return NextResponse.json({ error: "只能调整当前家庭活跃成员的积分。" }, { status: 403 });
+  }
+
   const { data: account } = await guard.supabase
     .from("points_accounts")
     .select("balance")
