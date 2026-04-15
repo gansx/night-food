@@ -442,6 +442,12 @@ textarea::placeholder {
   z-index: 1;
 }
 
+.admin-panel > *:has(.orbit-select[data-open="true"]),
+.admin-panel form:has(.orbit-select[data-open="true"]) {
+  z-index: 150;
+  overflow: visible;
+}
+
 .brand-kicker {
   display: inline-flex;
   width: fit-content;

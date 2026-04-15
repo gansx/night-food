@@ -446,6 +446,12 @@ textarea::placeholder {
   z-index: 1;
 }
 
+.glass-panel > *:has(.orbit-select[data-open="true"]),
+.glass-panel form:has(.orbit-select[data-open="true"]) {
+  z-index: 150;
+  overflow: visible;
+}
+
 .section-title {
   margin: 0;
   font-size: clamp(1.15rem, 2vw, 1.45rem);
