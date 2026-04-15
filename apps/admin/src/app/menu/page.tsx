@@ -192,7 +192,6 @@ export default async function MenuPage({
                             </div>
                             <EditMenuItemForm
                               id={item.id as string}
-                              categories={categoryOptions}
                               initialValue={{
                                 categoryId: item.category_id as string,
                                 name: item.name as string,
