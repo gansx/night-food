@@ -174,6 +174,232 @@ input[type="checkbox"]:focus-visible {
   box-shadow: 0 0 0 4px rgba(239, 159, 93, 0.16);
 }
 
+.orbit-select {
+  position: relative;
+  min-width: 0;
+}
+
+.orbit-select-trigger {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(239, 159, 93, 0.26);
+  border-radius: 18px;
+  padding: 12px 14px 12px 18px;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 18px 50%, rgba(239, 159, 93, 0.18), transparent 38px),
+    linear-gradient(135deg, rgba(239, 159, 93, 0.16), rgba(34, 116, 141, 0.08) 48%, rgba(2, 5, 7, 0.16)),
+    rgba(5, 11, 16, 0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(245, 232, 220, 0.09),
+    inset 0 -18px 36px rgba(0, 0, 0, 0.16),
+    0 16px 38px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  font-weight: 800;
+  text-align: left;
+}
+
+.orbit-select-trigger::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(115deg, rgba(245, 232, 220, 0.12), transparent 42%);
+  opacity: 0.68;
+}
+
+.orbit-select-trigger > * {
+  position: relative;
+  z-index: 1;
+}
+
+.orbit-select-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.orbit-select[data-open="true"] .orbit-select-trigger,
+.orbit-select-trigger:hover,
+.orbit-select-trigger:focus-visible {
+  border-color: rgba(239, 159, 93, 0.72);
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(245, 232, 220, 0.12),
+    0 0 0 4px rgba(239, 159, 93, 0.1),
+    0 22px 52px rgba(0, 0, 0, 0.32);
+}
+
+.orbit-select-caret {
+  display: grid;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(231, 201, 174, 0.22);
+  border-radius: 999px;
+  color: #e7c9ae;
+  background: rgba(239, 159, 93, 0.12);
+  transition: transform 160ms ease;
+}
+
+.orbit-select[data-open="true"] .orbit-select-caret {
+  transform: rotate(180deg);
+}
+
+.orbit-select-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 80;
+  display: grid;
+  max-height: 260px;
+  gap: 6px;
+  overflow: auto;
+  border: 1px solid rgba(239, 159, 93, 0.3);
+  border-radius: 20px;
+  padding: 8px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(239, 159, 93, 0.16), transparent 10rem),
+    linear-gradient(145deg, rgba(7, 17, 26, 0.98), rgba(3, 16, 13, 0.98));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(245, 232, 220, 0.08);
+  backdrop-filter: blur(22px);
+}
+
+.orbit-select-option {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 11px 12px;
+  color: var(--text-main);
+  background: transparent;
+  cursor: pointer;
+  font-weight: 760;
+  text-align: left;
+}
+
+.orbit-select-option:hover,
+.orbit-select-option:focus-visible {
+  border-color: rgba(231, 201, 174, 0.14);
+  outline: none;
+  background: rgba(231, 201, 174, 0.08);
+}
+
+.orbit-select-option[data-active="true"] {
+  border-color: rgba(239, 159, 93, 0.4);
+  color: #ffe0c4;
+  background: linear-gradient(135deg, rgba(232, 119, 72, 0.2), rgba(239, 159, 93, 0.12));
+}
+
+.orbit-select-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--brand);
+  box-shadow: 0 0 16px rgba(239, 159, 93, 0.72);
+}
+
+.orbit-filter-menu {
+  position: relative;
+  min-width: 150px;
+}
+
+.orbit-filter-menu summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  list-style: none;
+  border: 1px solid rgba(239, 159, 93, 0.28);
+  border-radius: 999px;
+  padding: 10px 12px 10px 16px;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 16px 50%, rgba(239, 159, 93, 0.15), transparent 34px),
+    linear-gradient(135deg, rgba(239, 159, 93, 0.16), rgba(34, 116, 141, 0.08)),
+    rgba(5, 11, 16, 0.86);
+  box-shadow: inset 0 1px 0 rgba(245, 232, 220, 0.08), 0 14px 34px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.orbit-filter-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.orbit-filter-menu summary::after {
+  display: grid;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid rgba(231, 201, 174, 0.22);
+  border-radius: 999px;
+  color: #e7c9ae;
+  background: rgba(239, 159, 93, 0.12);
+  content: "⌄";
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.orbit-filter-menu[open] summary {
+  border-color: rgba(239, 159, 93, 0.7);
+  box-shadow: inset 0 1px 0 rgba(245, 232, 220, 0.1), 0 0 0 4px rgba(239, 159, 93, 0.1), 0 22px 52px rgba(0, 0, 0, 0.32);
+}
+
+.orbit-filter-menu[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.orbit-filter-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 70;
+  display: grid;
+  gap: 6px;
+  min-width: max-content;
+  border: 1px solid rgba(239, 159, 93, 0.3);
+  border-radius: 20px;
+  padding: 8px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(239, 159, 93, 0.16), transparent 10rem),
+    linear-gradient(145deg, rgba(7, 17, 26, 0.98), rgba(3, 16, 13, 0.98));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(245, 232, 220, 0.08);
+}
+
+.orbit-filter-option {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: var(--text-main);
+  font-weight: 760;
+}
+
+.orbit-filter-option:hover,
+.orbit-filter-option.is-active {
+  border-color: rgba(239, 159, 93, 0.36);
+  color: #ffe0c4;
+  background: linear-gradient(135deg, rgba(232, 119, 72, 0.2), rgba(239, 159, 93, 0.12));
+}
+
 input::placeholder,
 textarea::placeholder {
   color: rgba(244, 255, 248, 0.42);

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { OrbitSelect } from "../../_components/orbit-select";
 import { ImageUploadField } from "./image-upload-field";
 
 type MenuCategoryOption = {
@@ -83,18 +84,13 @@ export function CreateMenuItemForm({
       <div style={{ marginTop: 14, display: "grid", gap: 12 }}>
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>分类</span>
-          <select
-            data-testid="create-menu-item-category"
+          <OrbitSelect
+            testId="create-menu-item-category"
             value={form.categoryId}
-            onChange={(event) => setForm((current) => ({ ...current, categoryId: event.target.value }))}
-            style={inputStyle}
-          >
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+            onChange={(categoryId) => setForm((current) => ({ ...current, categoryId }))}
+            placeholder="先创建分类"
+            options={categories.map((category) => ({ value: category.id, label: category.name }))}
+          />
         </label>
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>菜品名称</span>

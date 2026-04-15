@@ -104,7 +104,8 @@ async function createAssignedTask(adminPage: Page, input: { taskTitle: string; m
   await adminPage.goto(url(adminBaseUrl!, "/tasks"));
   await adminPage.getByTestId("create-task-title").fill(input.taskTitle);
   await adminPage.getByTestId("create-task-description").fill("E2E 指派任务回归");
-  await adminPage.getByTestId("create-task-assignee").selectOption({ label: input.memberDisplayName });
+  await adminPage.getByTestId("create-task-assignee").click();
+  await adminPage.getByRole("option", { name: input.memberDisplayName }).click();
   await adminPage.getByTestId("create-task-reward").fill("3");
   await adminPage.getByTestId("create-task-due-at").fill(futureDateTimeLocal(120));
   await adminPage.getByTestId("create-task-submit").click();

@@ -6,6 +6,7 @@ import { CreateMenuItemForm } from "./_components/create-menu-item-form";
 import { EditCategoryForm } from "./_components/edit-category-form";
 import { EditMenuItemForm } from "./_components/edit-menu-item-form";
 import { AdminShell } from "../_components/admin-shell";
+import { OrbitFormSelect } from "../_components/orbit-select";
 import { getAdminViewerSummary } from "../../lib/auth";
 import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 
@@ -98,24 +99,38 @@ export default async function MenuPage({
             </div>
             <form style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <input name="q" defaultValue={search} placeholder="搜索菜品" style={filterStyle} />
-              <select name="category" defaultValue={categoryFilter} style={filterStyle}>
-                <option value="all">全部分类</option>
-                {categoryOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-              <select name="status" defaultValue={statusFilter} style={filterStyle}>
-                <option value="all">全部状态</option>
-                <option value="available">已上架</option>
-                <option value="unavailable">已下架</option>
-              </select>
-              <select name="featured" defaultValue={featuredFilter} style={filterStyle}>
-                <option value="all">全部推荐状态</option>
-                <option value="featured">仅今日推荐</option>
-                <option value="normal">仅普通菜品</option>
-              </select>
+              <div style={{ minWidth: 170 }}>
+                <OrbitFormSelect
+                  name="category"
+                  defaultValue={categoryFilter}
+                  options={[
+                    { value: "all", label: "全部分类" },
+                    ...categoryOptions.map((option) => ({ value: option.id, label: option.name }))
+                  ]}
+                />
+              </div>
+              <div style={{ minWidth: 150 }}>
+                <OrbitFormSelect
+                  name="status"
+                  defaultValue={statusFilter}
+                  options={[
+                    { value: "all", label: "全部状态" },
+                    { value: "available", label: "已上架" },
+                    { value: "unavailable", label: "已下架" }
+                  ]}
+                />
+              </div>
+              <div style={{ minWidth: 190 }}>
+                <OrbitFormSelect
+                  name="featured"
+                  defaultValue={featuredFilter}
+                  options={[
+                    { value: "all", label: "全部推荐状态" },
+                    { value: "featured", label: "仅今日推荐" },
+                    { value: "normal", label: "仅普通菜品" }
+                  ]}
+                />
+              </div>
               <button type="submit" style={filterButtonStyle}>
                 筛选
               </button>

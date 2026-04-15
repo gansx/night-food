@@ -3,6 +3,7 @@ import type { OrderStatus } from "@night-food/types";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberShell } from "../_components/member-shell";
+import { OrbitFormSelect } from "../_components/orbit-select";
 import { getWebViewerSummary } from "../../lib/auth";
 import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { CancelOrderButton } from "./_components/cancel-order-button";
@@ -61,13 +62,16 @@ export default async function OrdersPage({
               placeholder="搜索订单号"
               style={filterInputStyle}
             />
-            <select name="status" defaultValue={currentStatus} style={filterInputStyle}>
-              {orderStatusOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option === "all" ? "全部状态" : getOrderStatusLabel(option)}
-                </option>
-              ))}
-            </select>
+            <div style={{ minWidth: 160 }}>
+              <OrbitFormSelect
+                name="status"
+                defaultValue={currentStatus}
+                options={orderStatusOptions.map((option) => ({
+                  value: option,
+                  label: option === "all" ? "全部状态" : getOrderStatusLabel(option)
+                }))}
+              />
+            </div>
             <button type="submit" style={filterButtonStyle}>
               筛选
             </button>

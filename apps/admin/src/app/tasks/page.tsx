@@ -3,6 +3,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../_components/admin-shell";
+import { OrbitFormSelect } from "../_components/orbit-select";
 import { getAdminViewerSummary } from "../../lib/auth";
 import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { ApproveTaskButton } from "./_components/approve-task-button";
@@ -105,13 +106,16 @@ export default async function AdminTasksPage({
             </div>
 
             <form style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-              <select name="status" defaultValue={currentStatus} style={filterStyle}>
-                {statusOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option === "all" ? "全部状态" : getTaskStatusLabel(option)}
-                  </option>
-                ))}
-              </select>
+              <div style={{ minWidth: 160 }}>
+                <OrbitFormSelect
+                  name="status"
+                  defaultValue={currentStatus}
+                  options={statusOptions.map((option) => ({
+                    value: option,
+                    label: option === "all" ? "全部状态" : getTaskStatusLabel(option)
+                  }))}
+                />
+              </div>
               <button type="submit" style={filterButtonStyle}>
                 筛选
               </button>

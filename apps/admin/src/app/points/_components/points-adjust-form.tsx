@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { OrbitSelect } from "../../_components/orbit-select";
 
 export function PointsAdjustForm({
   householdId,
@@ -58,26 +59,21 @@ export function PointsAdjustForm({
     <form onSubmit={handleSubmit} className="admin-panel" style={{ padding: 20 }}>
       <h3 style={{ margin: 0, fontSize: 18 }}>手动调整积分</h3>
       <div style={{ marginTop: 14, display: "grid", gap: 12 }}>
-        <select value={userId} onChange={(event) => setUserId(event.target.value)} style={inputStyle}>
-          {members.length ? (
-            members.map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.label}
-              </option>
-            ))
-          ) : (
-            <option value="">暂无可调整成员</option>
-          )}
-        </select>
+        <OrbitSelect
+          value={userId}
+          onChange={setUserId}
+          placeholder="暂无可调整成员"
+          options={members.map((member) => ({ value: member.id, label: member.label }))}
+        />
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <select
+          <OrbitSelect
             value={direction}
-            onChange={(event) => setDirection(event.target.value as "credit" | "debit")}
-            style={inputStyle}
-          >
-            <option value="credit">增加积分</option>
-            <option value="debit">扣减积分</option>
-          </select>
+            onChange={(nextDirection) => setDirection(nextDirection as "credit" | "debit")}
+            options={[
+              { value: "credit", label: "增加积分" },
+              { value: "debit", label: "扣减积分" }
+            ]}
+          />
           <input
             type="number"
             min={1}
@@ -104,7 +100,7 @@ export function PointsAdjustForm({
 }
 
 const inputStyle = {
-  borderRadius: 16,
+  borderRadius: 18,
   border: "1px solid var(--border)",
   padding: "14px 16px",
   background: "rgba(255,255,255,0.86)"

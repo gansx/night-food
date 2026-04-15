@@ -3,6 +3,7 @@ import type { OrderStatus } from "@night-food/types";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminShell } from "../_components/admin-shell";
+import { OrbitFormSelect } from "../_components/orbit-select";
 import { getAdminViewerSummary } from "../../lib/auth";
 import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { UpdateOrderStatusButton } from "./_components/update-order-status-button";
@@ -121,13 +122,16 @@ export default async function AdminOrdersPage({
 
           <form style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             <input name="q" defaultValue={q ?? ""} placeholder="订单号或备注" style={filterStyle} />
-            <select name="status" defaultValue={currentStatus} style={filterStyle}>
-              {orderStatusOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option === "all" ? "全部状态" : getOrderStatusLabel(option)}
-                </option>
-              ))}
-            </select>
+            <div style={{ minWidth: 160 }}>
+              <OrbitFormSelect
+                name="status"
+                defaultValue={currentStatus}
+                options={orderStatusOptions.map((option) => ({
+                  value: option,
+                  label: option === "all" ? "全部状态" : getOrderStatusLabel(option)
+                }))}
+              />
+            </div>
             <input name="from" type="date" defaultValue={from ?? ""} style={filterStyle} />
             <input name="to" type="date" defaultValue={to ?? ""} style={filterStyle} />
             <button type="submit" style={filterButtonStyle}>

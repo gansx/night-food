@@ -3,6 +3,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberShell } from "../_components/member-shell";
+import { OrbitFormSelect } from "../_components/orbit-select";
 import { getWebViewerSummary } from "../../lib/auth";
 import { createSupabaseServiceRoleClient } from "../../lib/supabase/service-role-client";
 import { ClaimTaskButton } from "./_components/claim-task-button";
@@ -92,13 +93,16 @@ export default async function TasksPage({
           </div>
 
           <form style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-            <select name="filter" defaultValue={currentFilter} style={filterStyle}>
-              {filterOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option === "all" ? "全部任务" : getTaskStatusLabel(option)}
-                </option>
-              ))}
-            </select>
+            <div style={{ minWidth: 160 }}>
+              <OrbitFormSelect
+                name="filter"
+                defaultValue={currentFilter}
+                options={filterOptions.map((option) => ({
+                  value: option,
+                  label: option === "all" ? "全部任务" : getTaskStatusLabel(option)
+                }))}
+              />
+            </div>
             <button type="submit" style={filterButtonStyle}>
               筛选
             </button>

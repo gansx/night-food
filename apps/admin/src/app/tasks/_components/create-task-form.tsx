@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { OrbitSelect } from "../../_components/orbit-select";
 
 type TaskAssigneeOption = {
   id: string;
@@ -93,19 +94,15 @@ export function CreateTaskForm({
         </label>
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>指派成员</span>
-          <select
-            data-testid="create-task-assignee"
+          <OrbitSelect
+            testId="create-task-assignee"
             value={form.assignedUserId}
-            onChange={(event) => setForm((current) => ({ ...current, assignedUserId: event.target.value }))}
-            style={inputStyle}
-          >
-            <option value="">不指定，公开领取</option>
-            {members.map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.label}
-              </option>
-            ))}
-          </select>
+            onChange={(assignedUserId) => setForm((current) => ({ ...current, assignedUserId }))}
+            options={[
+              { value: "", label: "不指定，公开领取" },
+              ...members.map((member) => ({ value: member.id, label: member.label }))
+            ]}
+          />
         </label>
         <label style={{ display: "grid", gap: 8 }}>
           <span style={{ color: "var(--muted)", fontSize: 14 }}>奖励积分</span>

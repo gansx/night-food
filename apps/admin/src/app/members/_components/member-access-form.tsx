@@ -1,8 +1,9 @@
 "use client";
 
+import type { HouseholdMemberStatus, HouseholdRole } from "@night-food/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { HouseholdMemberStatus, HouseholdRole } from "@night-food/types";
+import { OrbitSelect } from "../../_components/orbit-select";
 
 export function MemberAccessForm({
   memberId,
@@ -54,19 +55,23 @@ export function MemberAccessForm({
   return (
     <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 10 }}>
-        <select value={role} onChange={(event) => setRole(event.target.value as HouseholdRole)} style={inputStyle}>
-          <option value="member">家庭成员</option>
-          <option value="owner">家主</option>
-        </select>
-        <select
+        <OrbitSelect
+          value={role}
+          onChange={(nextRole) => setRole(nextRole as HouseholdRole)}
+          options={[
+            { value: "member", label: "家庭成员" },
+            { value: "owner", label: "家主" }
+          ]}
+        />
+        <OrbitSelect
           value={status}
-          onChange={(event) => setStatus(event.target.value as HouseholdMemberStatus)}
-          style={inputStyle}
-        >
-          <option value="active">正常</option>
-          <option value="inactive">停用</option>
-          <option value="removed">移除</option>
-        </select>
+          onChange={(nextStatus) => setStatus(nextStatus as HouseholdMemberStatus)}
+          options={[
+            { value: "active", label: "正常" },
+            { value: "inactive", label: "停用" },
+            { value: "removed", label: "移除" }
+          ]}
+        />
         <button type="button" onClick={handleSave} disabled={loading} style={buttonStyle}>
           {loading ? "保存中..." : "保存"}
         </button>
@@ -75,13 +80,6 @@ export function MemberAccessForm({
     </div>
   );
 }
-
-const inputStyle = {
-  borderRadius: 14,
-  border: "1px solid var(--border)",
-  padding: "10px 12px",
-  background: "rgba(255,255,255,0.86)"
-} satisfies React.CSSProperties;
 
 const buttonStyle = {
   border: 0,

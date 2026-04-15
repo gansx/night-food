@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { OrbitSelect } from "../../_components/orbit-select";
 import { ImageUploadField } from "./image-upload-field";
 
 type CategoryOption = {
@@ -90,17 +91,11 @@ export function EditMenuItemForm({
   return (
     <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 100px 100px", gap: 10 }}>
-        <select
+        <OrbitSelect
           value={form.categoryId}
-          onChange={(event) => setForm((current) => ({ ...current, categoryId: event.target.value }))}
-          style={inputStyle}
-        >
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+          onChange={(categoryId) => setForm((current) => ({ ...current, categoryId }))}
+          options={categories.map((category) => ({ value: category.id, label: category.name }))}
+        />
         <input
           value={form.name}
           onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
