@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 import { OrbitSelect } from "../../_components/orbit-select";
 
 export function PointsAdjustForm({
@@ -25,7 +26,7 @@ export function PointsAdjustForm({
     setMessage("正在调整积分...");
 
     try {
-      const response = await fetch("/api/points/adjust", {
+      const response = await fetchAppPath("/api/points/adjust", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

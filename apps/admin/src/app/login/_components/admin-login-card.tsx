@@ -4,6 +4,7 @@ import { createAuthEmailFromUsername, isValidUsername, normalizeUsername } from 
 import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
+import { navigateToAppPath } from "../../../lib/base-path";
 import { hasPublicSupabaseEnv } from "../../../lib/env";
 import { createSupabaseBrowserClient } from "../../../lib/supabase/browser-client";
 
@@ -49,7 +50,7 @@ export function AdminLoginCard() {
       }
 
       setMessage("登录成功，正在进入管理台...");
-      window.location.href = "/";
+      navigateToAppPath("/");
     } finally {
       setLoading(false);
     }

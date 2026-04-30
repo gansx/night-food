@@ -12,14 +12,21 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const origin = requestUrl.origin;
+  const appBasePath = requestUrl.pathname.replace(/\/auth\/callback$/, "") || "";
   const redirectTo = requestUrl.searchParams.get("next") ?? "/";
+  const resolvedRedirectTo =
+    redirectTo === "/"
+      ? `${appBasePath || ""}/`
+      : redirectTo.startsWith(appBasePath)
+        ? redirectTo
+        : `${appBasePath}${redirectTo.startsWith("/") ? redirectTo : `/${redirectTo}`}`;
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return NextResponse.redirect(`${origin}/login`);
+    return NextResponse.redirect(`${origin}${appBasePath}/login`);
   }
 
   if (code) {
-    const response = NextResponse.redirect(new URL(redirectTo, origin));
+    const response = NextResponse.redirect(new URL(resolvedRedirectTo, origin));
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -42,5 +49,5 @@ export async function GET(request: Request) {
     return response;
   }
 
-  return NextResponse.redirect(`${origin}/login`);
+  return NextResponse.redirect(`${origin}${appBasePath}/login`);
 }

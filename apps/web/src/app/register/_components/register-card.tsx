@@ -5,6 +5,7 @@ import type { RegisterAccountPayload } from "@night-food/types";
 import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
+import { fetchAppPath, navigateToAppPath } from "../../../lib/base-path";
 import { createSupabaseBrowserClient } from "../../../lib/supabase/browser-client";
 
 const registerSchema = z.object({
@@ -35,7 +36,7 @@ export function RegisterCard() {
       setLoading(true);
       setMessage("正在创建账号...");
 
-      const response = await fetch("/api/auth/register", {
+      const response = await fetchAppPath("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -61,7 +62,7 @@ export function RegisterCard() {
       }
 
       setMessage("注册成功，正在进入家庭引导...");
-      window.location.href = "/family";
+      navigateToAppPath("/family");
     } catch {
       setMessage("网络异常，请稍后重试。");
     } finally {

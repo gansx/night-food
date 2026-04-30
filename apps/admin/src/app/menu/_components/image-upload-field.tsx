@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 
 export function ImageUploadField({
   value,
@@ -25,7 +26,7 @@ export function ImageUploadField({
     setMessage("正在上传图片...");
 
     try {
-      const response = await fetch("/api/storage/menu-images", {
+      const response = await fetchAppPath("/api/storage/menu-images", {
         method: "POST",
         body: formData
       });

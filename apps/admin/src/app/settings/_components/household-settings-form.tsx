@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 
 type HouseholdSettingsFormProps = {
   householdId: string;
@@ -34,7 +35,7 @@ export function HouseholdSettingsForm({
     setMessage("正在保存家庭规则...");
 
     try {
-      const response = await fetch("/api/settings/household", {
+      const response = await fetchAppPath("/api/settings/household", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

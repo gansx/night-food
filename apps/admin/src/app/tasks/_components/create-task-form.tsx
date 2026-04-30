@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 import { OrbitSelect } from "../../_components/orbit-select";
 
 type TaskAssigneeOption = {
@@ -34,7 +35,7 @@ export function CreateTaskForm({
     setMessage("正在发布任务...");
 
     try {
-      const response = await fetch("/api/tasks", {
+      const response = await fetchAppPath("/api/tasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

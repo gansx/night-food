@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 
 type MenuCategory = {
   id: string;
@@ -71,7 +72,7 @@ export function OrderComposer({
     setMessage("正在提交订单...");
 
     try {
-      const response = await fetch("/api/orders", {
+      const response = await fetchAppPath("/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

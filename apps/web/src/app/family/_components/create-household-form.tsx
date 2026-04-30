@@ -2,6 +2,7 @@
 
 import type { HouseholdCreatePayload } from "@night-food/types";
 import { useState } from "react";
+import { fetchAppPath, navigateToAppPath } from "../../../lib/base-path";
 
 export function CreateHouseholdForm() {
   const [form, setForm] = useState<HouseholdCreatePayload>({ householdName: "" });
@@ -14,7 +15,7 @@ export function CreateHouseholdForm() {
     setMessage("正在创建家庭...");
 
     try {
-      const response = await fetch("/api/household/create", {
+      const response = await fetchAppPath("/api/household/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -29,7 +30,7 @@ export function CreateHouseholdForm() {
       }
 
       setMessage(`家庭创建成功，邀请码是 ${payload.familyCode ?? "已生成"}，正在进入首页...`);
-      window.location.href = payload.redirectTo ?? "/";
+      navigateToAppPath(payload.redirectTo ?? "/");
     } catch {
       setMessage("网络异常，请稍后重试。");
     } finally {

@@ -3,6 +3,7 @@
 import { normalizeFamilyCode } from "@night-food/lib";
 import type { JoinHouseholdByCodePayload } from "@night-food/types";
 import { useState } from "react";
+import { fetchAppPath, navigateToAppPath } from "../../../lib/base-path";
 
 export function JoinHouseholdForm() {
   const [form, setForm] = useState<JoinHouseholdByCodePayload>({ familyCode: "" });
@@ -15,7 +16,7 @@ export function JoinHouseholdForm() {
     setMessage("正在加入家庭...");
 
     try {
-      const response = await fetch("/api/household/join-by-code", {
+      const response = await fetchAppPath("/api/household/join-by-code", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -30,7 +31,7 @@ export function JoinHouseholdForm() {
       }
 
       setMessage("加入成功，正在进入家庭首页...");
-      window.location.href = payload.redirectTo ?? "/";
+      navigateToAppPath(payload.redirectTo ?? "/");
     } catch {
       setMessage("网络异常，请稍后重试。");
     } finally {

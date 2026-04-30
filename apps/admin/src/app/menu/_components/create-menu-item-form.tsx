@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 import { OrbitSelect } from "../../_components/orbit-select";
 import { ImageUploadField } from "./image-upload-field";
 
@@ -50,7 +51,7 @@ export function CreateMenuItemForm({
     setMessage("正在创建菜品...");
 
     try {
-      const response = await fetch("/api/menu/items", {
+      const response = await fetchAppPath("/api/menu/items", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

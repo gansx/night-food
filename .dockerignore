@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+**/node_modules
+**/.next
+**/.open-next
+**/coverage
+**/dist
+test-results
+playwright-report
+night-food-main.zip
+docs
+legacy
+

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 
 export function CreateCategoryForm({ householdId, onChanged }: { householdId: string; onChanged?: () => void }) {
   const router = useRouter();
@@ -15,7 +16,7 @@ export function CreateCategoryForm({ householdId, onChanged }: { householdId: st
     setMessage("正在创建分类...");
 
     try {
-      const response = await fetch("/api/menu/categories", {
+      const response = await fetchAppPath("/api/menu/categories", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

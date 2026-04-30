@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 
 export function RefreshFamilyCodeButton() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export function RefreshFamilyCodeButton() {
     setMessage("正在刷新邀请码...");
 
     try {
-      const response = await fetch("/api/household/code/refresh", {
+      const response = await fetchAppPath("/api/household/code/refresh", {
         method: "POST"
       });
       const payload = (await response.json()) as { error?: string; familyCode?: string };

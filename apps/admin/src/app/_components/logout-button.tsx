@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { navigateToAppPath } from "../../lib/base-path";
 import { createSupabaseBrowserClient } from "../../lib/supabase/browser-client";
 
 export function LogoutButton({ className }: { className?: string }) {
@@ -10,7 +11,7 @@ export function LogoutButton({ className }: { className?: string }) {
     setLoading(true);
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
-    window.location.href = "/login";
+    navigateToAppPath("/login");
   }
 
   return (

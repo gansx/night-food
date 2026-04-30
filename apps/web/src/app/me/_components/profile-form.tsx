@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 
 export function ProfileForm({
   initialDisplayName,
@@ -22,7 +23,7 @@ export function ProfileForm({
     setMessage("正在保存个人资料...");
 
     try {
-      const response = await fetch("/api/profile", {
+      const response = await fetchAppPath("/api/profile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

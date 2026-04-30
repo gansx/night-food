@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 
 type BatchItem = {
   id: string;
@@ -38,7 +39,7 @@ export function BatchMenuItemToggleForm({
     setLoading(true);
     setMessage("");
     try {
-      const response = await fetch("/api/menu/items/batch", {
+      const response = await fetchAppPath("/api/menu/items/batch", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

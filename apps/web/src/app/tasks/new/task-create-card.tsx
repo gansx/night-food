@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { fetchAppPath } from "../../../lib/base-path";
 
 export function CreateTaskCard({ householdId }: { householdId: string }) {
   const router = useRouter();
@@ -21,7 +22,7 @@ export function CreateTaskCard({ householdId }: { householdId: string }) {
     setMessage("正在发布任务...");
 
     try {
-      const response = await fetch("/api/tasks", {
+      const response = await fetchAppPath("/api/tasks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
